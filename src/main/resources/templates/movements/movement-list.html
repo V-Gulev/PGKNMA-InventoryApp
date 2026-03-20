@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{movements.title})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<!-- ─── Page Hero ─── -->
+<div class="movements-hero">
+    <div class="container">
+        <div class="movements-hero-content">
+            <div class="movements-hero-text">
+                <h1 class="movements-title">
+                    <span class="movements-title-icon"><i class="bi bi-arrow-left-right"></i></span>
+                    <span th:if="${asset != null}" th:text="#{movements.assetHistory} + ' ' + ${asset.modelName}">History</span>
+                    <span th:if="${asset == null}" th:text="#{movements.title}">All Movements</span>
+                </h1>
+                <p class="movements-subtitle">
+                    <span th:if="${asset != null}">Complete borrow &amp; return history for this asset</span>
+                    <span th:if="${asset == null}" th:text="#{movements.subtitle}">Overview of all asset borrows, returns, and scheduled movements</span>
+                </p>
+            </div>
+            <div class="movements-hero-actions">
+                <a th:if="${asset != null}" th:href="@{/assets}" class="btn btn-outline-secondary btn-lg movements-back-btn">
+                    <i class="bi bi-arrow-left"></i> <span th:text="#{nav.assets}">Back to Assets</span>
+                </a>
+                <a th:href="@{/movements/borrow}" class="btn btn-primary btn-lg movements-borrow-btn">
+                    <i class="bi bi-box-arrow-up-right"></i> <span th:text="#{movements.borrowAsset}">Borrow Asset</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container movements-container">
+
+    <!-- Flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="#{${successMessage}}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="#{${errorMessage}}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- ─── Search & Filter ─── -->
+    <div class="movements-filter-card" th:if="${asset == null}">
+        <div class="movements-filter-header">
+            <i class="bi bi-funnel"></i> <span th:text="#{movements.filter}">Filter &amp; Search</span>
+        </div>
+        <form th:action="@{/movements}" method="get" class="movements-filter-form">
+            <div class="movements-filter-row">
+                <div class="movements-filter-field">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" name="keyword" class="form-control"
+                               th:placeholder="#{movements.search.placeholder}"
+                               th:value="${keyword}">
+                    </div>
+                </div>
+                <div class="movements-filter-field">
+                    <select name="status" class="form-select">
+                        <option value="all" th:selected="${status == 'all' || status == null}" th:text="#{movements.allStatuses}">All Statuses</option>
+                        <option value="active" th:selected="${status == 'active'}" th:text="#{movements.filter.active}">Active / Scheduled</option>
+                        <option value="returned" th:selected="${status == 'returned'}" th:text="#{movements.filter.returned}">Returned</option>
+                    </select>
+                </div>
+                <div class="movements-filter-field">
+                    <select name="sortField" class="form-select">
+                        <option value="borrowedDate" th:selected="${sortField == 'borrowedDate' || sortField == null}" th:text="#{movements.sort.date}">Sort by Date</option>
+                        <option value="asset.modelName" th:selected="${sortField == 'asset.modelName'}" th:text="#{movements.sort.name}">Sort by Name</option>
+                        <option value="asset.inventoryNumber" th:selected="${sortField == 'asset.inventoryNumber'}" th:text="#{movements.sort.inv}">Sort by Inv. No.</option>
+                    </select>
+                </div>
+                <div class="movements-filter-actions">
+                    <input type="hidden" name="sortDir" th:value="${sortDir}" id="sortDirInput" />
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel-fill"></i> <span th:text="#{movements.apply}">Apply</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-info" title="Toggle Sort Order"
+                            onclick="document.getElementById('sortDirInput').value = document.getElementById('sortDirInput').value === 'asc' ? 'desc' : 'asc'; this.closest('form').submit();">
+                        <i class="bi" th:classappend="${sortDir == 'asc' ? 'bi-sort-numeric-down' : 'bi-sort-numeric-down-alt'}"></i>
+                    </button>
+                    <a th:href="@{/movements}" class="btn btn-outline-secondary" th:title="#{movements.clearFilters}">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- ─── Results Count ─── -->
+    <div class="movements-results-bar" th:if="${!#lists.isEmpty(movements)}">
+        <span class="movements-results-count">
+            <i class="bi bi-list-ul"></i>
+            <strong th:text="${#lists.size(movements)}">0</strong> <span th:text="#{movements.found}">movement(s) found</span>
+        </span>
+    </div>
+
+    <!-- ─── Movements Card Grid ─── -->
+    <div class="movements-grid" th:if="${!#lists.isEmpty(movements)}">
+        <div class="movements-card" th:each="m, iter : ${movements}"
+             th:with="canAct=${currentUserRole == 'ADMIN' or currentUserRole == 'MANAGER' or m.user.username == currentUsername}">
+
+            <!-- Card Header -->
+            <div class="movements-card-header">
+                <div class="movements-card-asset-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="movements-card-title-group">
+                    <h3 class="movements-card-name" th:text="${m.asset.modelName}">Asset Name</h3>
+                    <span class="movements-card-inv" th:text="'#' + ${m.asset.inventoryNumber}">INV-001</span>
+                </div>
+
+                <!-- Status Badge -->
+                <span th:if="${m.status != null && m.status.name() == 'PENDING'}" class="badge bg-warning movements-card-badge">
+                    <i class="bi bi-hourglass-split"></i> <span th:text="#{${'enum.MovementStatus.PENDING'}}">Pending</span>
+                </span>
+                <span th:if="${m.status != null && m.status.name() == 'REJECTED'}" class="badge bg-danger movements-card-badge">
+                    <i class="bi bi-x-circle"></i> <span th:text="#{${'enum.MovementStatus.REJECTED'}}">Rejected</span>
+                </span>
+                <span th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.returnedDate != null}" class="badge bg-secondary movements-card-badge">
+                    <i class="bi bi-check2-all"></i> <span th:text="#{movements.filter.returned}">Returned</span>
+                </span>
+                <span th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.returnedDate == null && m.borrowedDate.isAfter(T(java.time.LocalDate).now())}" class="badge bg-info movements-card-badge">
+                    <i class="bi bi-calendar-check"></i> <span th:text="#{myItems.scheduled}">Scheduled</span>
+                </span>
+                <span th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.returnedDate == null && !m.borrowedDate.isAfter(T(java.time.LocalDate).now())}" class="badge bg-success movements-card-badge">
+                    <i class="bi bi-play-circle"></i> <span th:text="#{myItems.active}">Active</span>
+                </span>
+            </div>
+
+            <!-- Card Details -->
+            <div class="movements-card-details">
+                <div class="movements-card-detail">
+                    <span class="movements-card-detail-label"><i class="bi bi-person"></i> <span th:text="#{movements.table.borrower}">User</span></span>
+                    <span class="movements-card-detail-value" th:text="${m.user.fullName}">John Doe</span>
+                </div>
+                <div class="movements-card-detail">
+                    <span class="movements-card-detail-label"><i class="bi bi-calendar3"></i> <span th:text="#{movements.table.borrowedDate}">Borrowed</span></span>
+                    <span class="movements-card-detail-value" th:text="${#temporals.format(m.borrowedDate, 'dd MMM yyyy')}">01 Jan 2025</span>
+                </div>
+                <div class="movements-card-detail" th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.returnedDate != null}">
+                    <span class="movements-card-detail-label"><i class="bi bi-calendar-check"></i> <span th:text="#{movements.table.returnedDate}">Returned</span></span>
+                    <span class="movements-card-detail-value" th:text="${#temporals.format(m.returnedDate, 'dd MMM yyyy')}">15 Jan 2025</span>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="movements-card-notes" th:if="${m.notes != null && !#strings.isEmpty(m.notes)}">
+                <span class="movements-card-notes-label"><i class="bi bi-chat-left-text"></i> <span th:text="#{movements.notes}">Notes</span></span>
+                <span class="movements-card-notes-text" th:text="${m.notes}">Some notes here</span>
+            </div>
+
+            <!-- Card Actions -->
+            <div class="movements-card-actions">
+                <!-- Pending status -->
+                <div th:if="${m.status != null && m.status.name() == 'PENDING'}" class="movements-card-action-info">
+                    <i class="bi bi-hourglass"></i> Awaiting manager approval
+                </div>
+
+                <!-- Rejected status -->
+                <div th:if="${m.status != null && m.status.name() == 'REJECTED'}" class="movements-card-action-info movements-card-action-info--danger"
+                     th:title="${m.notes}">
+                    <i class="bi bi-info-circle"></i> Request was rejected
+                </div>
+
+                <!-- Returned – no action needed -->
+                <div th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.returnedDate != null}" class="movements-card-action-info movements-card-action-info--muted">
+                    <i class="bi bi-check-circle"></i> Completed
+                </div>
+
+                <!-- Active → return form -->
+                <form th:if="${canAct and m.returnedDate == null and (m.status == null || m.status.name() == 'APPROVED') and !m.borrowedDate.isAfter(T(java.time.LocalDate).now())}"
+                      th:action="@{/movements/return/{id}(id=${m.asset.id})}" method="post"
+                      class="movements-return-form">
+                    <div class="movements-return-fields">
+                        <select name="newCondition" class="form-select form-select-sm" title="Update condition">
+                            <option th:each="c : ${conditions}" th:value="${c}" th:text="#{${'enum.AssetCondition.' + c}}" th:selected="${c == m.asset.itemCondition}"></option>
+                        </select>
+                        <input type="text" name="notes" class="form-control form-control-sm"
+                               th:placeholder="#{movements.notes.placeholder}"/>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-sm movements-return-btn">
+                        <i class="bi bi-box-arrow-in-down"></i> <span th:text="#{movements.return}">Return Item</span>
+                    </button>
+                </form>
+
+                <!-- Scheduled → cancel -->
+                <form th:if="${canAct and m.returnedDate == null and (m.status == null || m.status.name() == 'APPROVED') and m.borrowedDate.isAfter(T(java.time.LocalDate).now())}"
+                      th:action="@{/movements/cancel/{id}(id=${m.asset.id})}" method="post"
+                      onsubmit="return confirm('Cancel this upcoming borrow?');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm movements-cancel-btn">
+                        <i class="bi bi-x-circle"></i> <span th:text="#{movements.cancelReservation}">Cancel Reservation</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Empty State ─── -->
+    <div class="movements-empty" th:if="${#lists.isEmpty(movements)}">
+        <div class="movements-empty-icon">
+            <i class="bi bi-arrow-left-right"></i>
+        </div>
+        <h3 th:text="#{movements.empty.title}">No Movements Found</h3>
+        <p th:if="${asset != null}">This asset has no movement history yet.</p>
+        <p th:if="${asset == null}"><span th:text="#{movements.empty.text}">No movements match your current filters.</span><br/><span th:text="#{movements.empty.text2}">Try adjusting your search or browse all movements.</span></p>
+        <div class="movements-empty-actions">
+            <a th:if="${asset == null}" th:href="@{/movements}" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle"></i> <span th:text="#{movements.clearFilters}">Clear Filters</span>
+            </a>
+            <a th:href="@{/movements/borrow}" class="btn btn-primary">
+                <i class="bi bi-box-arrow-up-right"></i> <span th:text="#{movements.borrowAsset}">Borrow an Asset</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

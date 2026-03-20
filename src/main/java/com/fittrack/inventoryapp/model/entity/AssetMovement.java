@@ -1,9 +1,12 @@
 package com.fittrack.inventoryapp.model.entity;
 
+import com.fittrack.inventoryapp.model.enums.MovementStatus;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -33,11 +36,17 @@ public class AssetMovement {
 
     @NotNull(message = "Borrowed date is required")
     @Column(name = "borrowed_date", nullable = false)
-    private LocalDateTime borrowedDate;
+    private LocalDate borrowedDate;
 
     @Column(name = "returned_date")
     private LocalDateTime returnedDate;
 
     @Column(columnDefinition = "TEXT")
     private String notes;
+
+    @NotNull(message = "Movement status is required")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private MovementStatus status = MovementStatus.PENDING;
 }

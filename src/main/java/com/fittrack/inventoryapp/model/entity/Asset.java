@@ -6,8 +6,11 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "assets")
@@ -37,9 +40,11 @@ public class Asset {
 
     private String category;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "purchase_date")
     private LocalDate purchaseDate;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "warranty_end_date")
     private LocalDate warrantyEndDate;
 
@@ -52,4 +57,15 @@ public class Asset {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AssetStatus status;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "added_by_id")
+    private User addedBy;
 }

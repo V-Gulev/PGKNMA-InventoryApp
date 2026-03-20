@@ -1,10 +1,8 @@
 package com.fittrack.inventoryapp.model.entity;
 
-import com.fittrack.inventoryapp.model.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -13,14 +11,14 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "manager_registration_requests")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class User {
+public class ManagerRegistrationRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,11 +44,6 @@ public class User {
     @Pattern(regexp = "^[\\p{L} .'-]+$", message = "Full name must contain only letters")
     @Column(nullable = false)
     private String fullName;
-
-    @NotNull(message = "Role is required")
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
 
     @CreationTimestamp
     @Column(updatable = false)

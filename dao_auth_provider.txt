@@ -1,0 +1,22 @@
+Compiled from "DaoAuthenticationProvider.java"
+public class org.springframework.security.authentication.dao.DaoAuthenticationProvider extends org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider {
+  private static final java.lang.String USER_NOT_FOUND_PASSWORD;
+  private java.util.function.Supplier<org.springframework.security.crypto.password.PasswordEncoder> passwordEncoder;
+  private volatile java.lang.String userNotFoundEncodedPassword;
+  private final org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
+  private org.springframework.security.core.userdetails.UserDetailsPasswordService userDetailsPasswordService;
+  private org.springframework.security.authentication.password.CompromisedPasswordChecker compromisedPasswordChecker;
+  public org.springframework.security.authentication.dao.DaoAuthenticationProvider(org.springframework.security.core.userdetails.UserDetailsService);
+  protected void additionalAuthenticationChecks(org.springframework.security.core.userdetails.UserDetails, org.springframework.security.authentication.UsernamePasswordAuthenticationToken) throws org.springframework.security.core.AuthenticationException;
+  protected void doAfterPropertiesSet();
+  protected final org.springframework.security.core.userdetails.UserDetails retrieveUser(java.lang.String, org.springframework.security.authentication.UsernamePasswordAuthenticationToken) throws org.springframework.security.core.AuthenticationException;
+  protected org.springframework.security.core.Authentication createSuccessAuthentication(java.lang.Object, org.springframework.security.core.Authentication, org.springframework.security.core.userdetails.UserDetails);
+  private void prepareTimingAttackProtection();
+  private void mitigateAgainstTimingAttack(org.springframework.security.authentication.UsernamePasswordAuthenticationToken);
+  public void setPasswordEncoder(org.springframework.security.crypto.password.PasswordEncoder);
+  protected org.springframework.security.crypto.password.PasswordEncoder getPasswordEncoder();
+  protected org.springframework.security.core.userdetails.UserDetailsService getUserDetailsService();
+  public void setUserDetailsPasswordService(org.springframework.security.core.userdetails.UserDetailsPasswordService);
+  public void setCompromisedPasswordChecker(org.springframework.security.authentication.password.CompromisedPasswordChecker);
+  private static org.springframework.security.crypto.password.PasswordEncoder lambda$setPasswordEncoder$0(org.springframework.security.crypto.password.PasswordEncoder);
+}

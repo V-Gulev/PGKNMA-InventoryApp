@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{login.title})}"></head>
+<body class="auth-page">
+<div class="auth-card">
+    <div class="auth-icon-header">
+        <i class="bi bi-box-seam"></i>
+    </div>
+    <h2 class="auth-title" th:text="#{login.title}">Welcome Back</h2>
+    <p class="auth-subtitle" th:text="#{login.subtitle}">Sign in to School Inventory</p>
+
+    <!-- Alerts -->
+    <div th:if="${param.registered}" class="alert alert-success alert-sm">
+        <i class="bi bi-check-circle me-1"></i><span th:text="#{login.alert.registered}">Registration successful! Please log in.</span>
+    </div>
+    <div th:if="${param.request_sent}" class="alert alert-success alert-sm">
+        <i class="bi bi-check-circle me-1"></i><span th:text="#{login.alert.request_sent}">Registration request sent! Please wait for admin approval.</span>
+    </div>
+    <div th:if="${param.error}" class="alert alert-danger alert-sm">
+        <i class="bi bi-exclamation-triangle me-1"></i><span th:text="#{login.alert.error}">Invalid username or password.</span>
+    </div>
+    <div th:if="${param.logout}" class="alert alert-info alert-sm">
+        <i class="bi bi-info-circle me-1"></i><span th:text="#{login.alert.logout}">You have been logged out.</span>
+    </div>
+
+    <form th:action="@{/login}" method="post" class="auth-form">
+        <div class="auth-field">
+            <label class="auth-label" th:text="#{login.username}">Username</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-person auth-input-icon"></i>
+                <input type="text" name="username" class="form-control auth-input"
+                       th:placeholder="#{login.username.placeholder}" required autofocus/>
+            </div>
+        </div>
+        <div class="auth-field">
+            <label class="auth-label" th:text="#{login.password}">Password</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-lock auth-input-icon"></i>
+                <input type="password" name="password" id="loginPassword" class="form-control auth-input"
+                       th:placeholder="#{login.password.placeholder}" required/>
+                <i class="bi bi-eye-slash password-toggle-icon" onclick="togglePasswordVisibility('loginPassword', this)"></i>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary auth-submit" th:text="#{login.submit}">Sign In</button>
+    </form>
+
+    <div class="auth-footer">
+        <span th:text="#{login.noAccount}">Don't have an account?</span>
+        <a th:href="@{/register}" th:text="#{login.createOne}">Create one</a>
+    </div>
+</div>
+</body>
+</html>

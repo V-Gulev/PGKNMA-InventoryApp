@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{profile.title})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<!-- ─── Page Hero ─── -->
+<div class="profile-hero">
+    <div class="container">
+        <div class="profile-hero-content">
+            <div class="profile-hero-text">
+                <h1 class="profile-title">
+                    <span class="profile-title-icon"><i class="bi bi-person-circle"></i></span>
+                    <span th:text="#{profile.title}">My Profile</span>
+                </h1>
+                <p class="profile-subtitle" th:text="#{profile.subtitle}">View your account details and manage your password</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container profile-container">
+
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-1"></i><span th:text="#{${successMessage}}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-1"></i><span th:text="#{${errorMessage}}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="profile-grid">
+
+        <!-- ─── Account Info ─── -->
+        <div class="profile-section-card">
+            <div class="profile-section-header">
+                <h3 class="profile-section-title">
+                    <i class="bi bi-info-circle"></i> <span th:text="#{profile.accountInfo}">Account Information</span>
+                </h3>
+            </div>
+            <div class="profile-info-body">
+                <div class="profile-info-row">
+                    <span class="profile-info-label" th:text="#{profile.username}">Username</span>
+                    <span class="profile-info-value" th:text="${profileUser.username}"></span>
+                </div>
+                <div class="profile-info-row">
+                    <span class="profile-info-label" th:text="#{profile.email}">Email</span>
+                    <span class="profile-info-value" th:text="${profileUser.email}"></span>
+                </div>
+                <div class="profile-info-row">
+                    <span class="profile-info-label" th:text="#{profile.fullName}">Full Name</span>
+                    <span class="profile-info-value" th:text="${profileUser.fullName}"></span>
+                </div>
+                <div class="profile-info-row">
+                    <span class="profile-info-label" th:text="#{profile.role}">Role</span>
+                    <span class="profile-info-value">
+                        <span class="badge bg-primary" th:text="#{${'enum.Role.' + profileUser.role}}"></span>
+                    </span>
+                </div>
+                <div class="profile-info-row">
+                    <span class="profile-info-label" th:text="#{profile.memberSince}">Member Since</span>
+                    <span class="profile-info-value"
+                          th:text="${profileUser.createdAt != null} ? ${#temporals.format(profileUser.createdAt, 'dd MMM yyyy, HH:mm')} : #{common.noData}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── Change Email ─── -->
+        <div class="profile-section-card">
+            <div class="profile-section-header">
+                <h3 class="profile-section-title">
+                    <i class="bi bi-envelope"></i> <span th:text="#{profile.changeEmail}">Change Email</span>
+                </h3>
+            </div>
+            <div class="profile-password-body">
+                <form th:action="@{/profile/change-email}" method="post" class="profile-password-form">
+                    <div class="profile-form-field">
+                        <label for="currentPasswordEmail" class="profile-form-label" th:text="#{profile.currentPassword}">Current Password</label>
+                        <div class="profile-input-wrap">
+                            <i class="bi bi-key profile-input-icon"></i>
+                            <input type="password" id="currentPasswordEmail" name="currentPassword"
+                                   class="form-control profile-input"
+                                   th:placeholder="#{profile.currentPassword.placeholder}" required/>
+                            <i class="bi bi-eye-slash password-toggle-icon" onclick="togglePasswordVisibility('currentPasswordEmail', this)"></i>
+                        </div>
+                    </div>
+                    <div class="profile-form-field">
+                        <label for="newEmail" class="profile-form-label" th:text="#{profile.newEmail}">New Email</label>
+                        <div class="profile-input-wrap">
+                            <i class="bi bi-envelope profile-input-icon"></i>
+                            <input type="email" id="newEmail" name="newEmail"
+                                   class="form-control profile-input"
+                                   th:placeholder="#{profile.newEmail.placeholder}" required/>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary profile-submit-btn">
+                        <i class="bi bi-check-circle"></i> <span th:text="#{profile.updateEmail}">Update Email</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ─── Change Password ─── -->
+        <div class="profile-section-card">
+            <div class="profile-section-header">
+                <h3 class="profile-section-title">
+                    <i class="bi bi-lock"></i> <span th:text="#{profile.changePassword}">Change Password</span>
+                </h3>
+            </div>
+            <div class="profile-password-body">
+                <form th:action="@{/profile/change-password}" method="post" class="profile-password-form">
+                    <div class="profile-form-field">
+                        <label for="currentPassword" class="profile-form-label" th:text="#{profile.currentPassword}">Current Password</label>
+                        <div class="profile-input-wrap">
+                            <i class="bi bi-key profile-input-icon"></i>
+                            <input type="password" id="currentPassword" name="currentPassword"
+                                   class="form-control profile-input"
+                                   th:placeholder="#{profile.currentPassword.placeholder}" required/>
+                            <i class="bi bi-eye-slash password-toggle-icon" onclick="togglePasswordVisibility('currentPassword', this)"></i>
+                        </div>
+                    </div>
+                    <div class="profile-form-field">
+                        <label for="newPassword" class="profile-form-label" th:text="#{profile.newPassword}">New Password</label>
+                        <div class="profile-input-wrap">
+                            <i class="bi bi-lock profile-input-icon"></i>
+                            <input type="password" id="newPassword" name="newPassword"
+                                   class="form-control profile-input"
+                                   th:placeholder="#{profile.newPassword.placeholder}" required minlength="6"/>
+                            <i class="bi bi-eye-slash password-toggle-icon" onclick="togglePasswordVisibility('newPassword', this)"></i>
+                        </div>
+                    </div>
+                    <div class="profile-form-field">
+                        <label for="confirmPassword" class="profile-form-label" th:text="#{profile.confirmPassword}">Confirm New Password</label>
+                        <div class="profile-input-wrap">
+                            <i class="bi bi-check-circle profile-input-icon"></i>
+                            <input type="password" id="confirmPassword" name="confirmPassword"
+                                   class="form-control profile-input"
+                                   th:placeholder="#{profile.confirmPassword.placeholder}" required minlength="6"/>
+                            <i class="bi bi-eye-slash password-toggle-icon" onclick="togglePasswordVisibility('confirmPassword', this)"></i>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary profile-submit-btn">
+                        <i class="bi bi-shield-check"></i> <span th:text="#{profile.updatePassword}">Update Password</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

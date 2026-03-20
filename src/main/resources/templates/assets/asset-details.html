@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{assets.details.title})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<!-- ─── Page Hero ─── -->
+<div class="asset-details-hero">
+    <div class="container">
+        <div class="asset-details-hero-content">
+            <div class="asset-details-hero-text">
+                <h1 class="asset-details-title">
+                    <span class="asset-details-title-icon"><i class="bi bi-box-seam"></i></span>
+                    <span th:text="#{assets.details.title}">Asset Details</span>
+                </h1>
+                <p class="asset-details-subtitle" th:text="#{assets.details.subtitle}">View complete information and history for this asset</p>
+            </div>
+            <div class="asset-details-hero-actions">
+                <a th:href="@{/assets}" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-left"></i> <span th:text="#{assets.title}">Asset Inventory</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container asset-details-container">
+
+    <div class="asset-details-grid">
+
+        <!-- ─── Asset Info ─── -->
+        <div class="asset-details-section-card">
+            <div class="asset-details-section-header">
+                <h3 class="asset-details-section-title">
+                    <i class="bi bi-info-circle"></i> <span th:text="#{assets.details.info}">Asset Information</span>
+                </h3>
+            </div>
+            <div class="asset-details-info-body">
+                <div class="asset-details-info-row">
+                    <span class="asset-details-info-label" th:text="#{assets.table.inventoryNo}">Inventory No.</span>
+                    <span class="asset-details-info-value fw-bold text-accent" th:text="${asset.inventoryNumber}"></span>
+                </div>
+                <div class="asset-details-info-row">
+                    <span class="asset-details-info-label" th:text="#{assets.table.serialNo}">Serial No.</span>
+                    <span class="asset-details-info-value" th:text="${asset.serialNumber != null and !asset.serialNumber.isEmpty() ? asset.serialNumber : '-'}"></span>
+                </div>
+                <div class="asset-details-info-row">
+                    <span class="asset-details-info-label" th:text="#{assets.table.model}">Model</span>
+                    <span class="asset-details-info-value fw-semibold" th:text="${asset.modelName}"></span>
+                </div>
+                <div class="asset-details-info-row">
+                    <span class="asset-details-info-label" th:text="#{assets.table.category}">Category</span>
+                    <span class="asset-details-info-value" th:text="${asset.category}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── Dates & Warranties ─── -->
+        <div class="asset-details-section-card">
+            <div class="asset-details-section-header">
+                <h3 class="asset-details-section-title">
+                    <i class="bi bi-calendar-check"></i> <span th:text="#{assets.details.dates}">Important Dates</span>
+                </h3>
+            </div>
+            <div class="asset-details-info-body">
+                <div class="asset-details-info-row">
+                    <span class="asset-details-info-label" th:text="#{assets.table.addedDate}">Added Date</span>
+                    <span class="asset-details-info-value"
+                          th:text="${asset.createdAt != null} ? ${#temporals.format(asset.createdAt, 'dd MMM yyyy')} : #{common.noData}"></span>
+                </div>
+                <div class="asset-details-info-row">
+                    <span class="asset-details-info-label" th:text="#{assets.purchaseDate}">Purchase Date</span>
+                    <span class="asset-details-info-value"
+                          th:text="${asset.purchaseDate != null} ? ${#temporals.format(asset.purchaseDate, 'dd MMM yyyy')} : #{common.noData}"></span>
+                </div>
+                <div class="asset-details-info-row">
+                    <span class="asset-details-info-label" th:text="#{assets.warrantyEndDate}">Warranty End Date</span>
+                    <span class="asset-details-info-value"
+                          th:text="${asset.warrantyEndDate != null} ? ${#temporals.format(asset.warrantyEndDate, 'dd MMM yyyy')} : #{common.noData}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── Status & Condition ─── -->
+        <div class="asset-details-section-card">
+            <div class="asset-details-section-header">
+                <h3 class="asset-details-section-title">
+                    <i class="bi bi-shield-check"></i> <span th:text="#{assets.details.status}">Status & Condition</span>
+                </h3>
+            </div>
+            <div class="asset-details-info-body">
+                <div class="asset-details-info-row">
+                    <span class="asset-details-info-label" th:text="#{assets.table.condition}">Condition</span>
+                    <span class="asset-details-info-value">
+                        <span class="badge"
+                              th:classappend="${asset.itemCondition.name() == 'NEW'} ? 'bg-success' :
+                                              (${asset.itemCondition.name() == 'USED'} ? 'bg-info' :
+                                              (${asset.itemCondition.name() == 'DAMAGED'} ? 'bg-warning' : 'bg-danger'))"
+                              th:text="#{${'enum.AssetCondition.' + asset.itemCondition}}"></span>
+                    </span>
+                </div>
+                <div class="asset-details-info-row">
+                    <span class="asset-details-info-label" th:text="#{assets.table.status}">Status</span>
+                    <span class="asset-details-info-value">
+                        <span class="badge"
+                              th:classappend="${asset.status.name() == 'AVAILABLE'} ? 'bg-success' :
+                                              (${asset.status.name() == 'IN_USE'} ? 'bg-warning' :
+                                              (${asset.status.name() == 'RESERVED'} ? 'bg-info' : 'bg-secondary'))"
+                              th:text="#{${'enum.AssetStatus.' + asset.status}}"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── Additional Info ─── -->
+        <div class="asset-details-section-card">
+            <div class="asset-details-section-header">
+                <h3 class="asset-details-section-title">
+                    <i class="bi bi-file-text"></i> <span th:text="#{assets.details.additionalInfo}">Additional Information</span>
+                </h3>
+            </div>
+            <div class="asset-details-info-body">
+                <div class="asset-details-info-row">
+                    <span class="asset-details-info-label" th:text="#{assets.details.addedBy}">Added By</span>
+                    <span class="asset-details-info-value"
+                          th:text="${asset.addedBy != null} ? ${asset.addedBy.fullName} : #{common.noData}"></span>
+                </div>
+                <div class="asset-details-info-row" th:if="${asset.description != null and !asset.description.isBlank()}" style="flex-wrap: wrap;">
+                    <span class="asset-details-info-label" th:text="#{assets.details.description}">Description</span>
+                    <span class="asset-details-info-value text-break" style="white-space: pre-wrap; width: 100%; margin-top: 0.5rem;" th:text="${asset.description}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── Recent History ─── -->
+        <div class="asset-details-section-card" style="grid-column: 1 / -1;">
+            <div class="asset-details-section-header d-flex justify-content-between align-items-center">
+                <h3 class="asset-details-section-title mb-0">
+                    <i class="bi bi-clock-history"></i> <span th:text="#{assets.details.recentHistory}">Recent Movements</span>
+                </h3>
+                <a th:href="@{/assets/{id}/history(id=${asset.id})}" class="btn btn-sm btn-outline-info">
+                    <i class="bi bi-arrow-right-circle"></i> View All
+                </a>
+            </div>
+            
+            <div class="table-responsive p-3" th:if="${!#lists.isEmpty(recentMovements)}">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                    <tr>
+                        <th th:text="#{movements.table.borrower}">Borrower</th>
+                        <th th:text="#{movements.table.borrowedDate}">Borrowed Date</th>
+                        <th th:text="#{movements.table.returnedDate}">Returned Date</th>
+                        <th th:text="#{movements.table.status}">Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="movement : ${recentMovements}">
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width: 32px; height: 32px; font-weight: 600; font-size: 0.8rem;"
+                                     th:text="${#strings.substring(movement.user.username, 0, 1).toUpperCase()}">
+                                </div>
+                                <span class="fw-medium" th:text="${movement.user.username}"></span>
+                            </div>
+                        </td>
+                        <td class="text-secondary" th:text="${movement.borrowedDate != null ? #temporals.format(movement.borrowedDate, 'dd MMM yyyy') : '—'}"></td>
+                        <td class="text-secondary" th:text="${movement.returnedDate != null ? #temporals.format(movement.returnedDate, 'dd MMM yyyy') : '—'}"></td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${movement.status.name() == 'ACTIVE'} ? 'bg-info' :
+                                                  (${movement.status.name() == 'COMPLETED'} ? 'bg-success' :
+                                                  (${movement.status.name() == 'SCHEDULED'} ? 'bg-warning' : 'bg-secondary'))"
+                                  th:text="#{${'enum.MovementStatus.' + movement.status}}"></span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 text-center text-muted" th:if="${#lists.isEmpty(recentMovements)}">
+                <i class="bi bi-inbox fs-2 mb-2 d-block"></i>
+                <span th:text="#{movements.empty.text}">No movement records match your current filters.</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

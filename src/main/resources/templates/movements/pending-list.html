@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{pending.title})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<!-- ─── Page Hero ─── -->
+<div class="pending-hero">
+    <div class="container">
+        <div class="pending-hero-content">
+            <div class="pending-hero-text">
+                <h1 class="pending-title">
+                    <span class="pending-title-icon"><i class="bi bi-clock-history"></i></span>
+                    <span th:text="#{pending.title}">Pending Borrow Requests</span>
+                </h1>
+                <p class="pending-subtitle" th:text="#{pending.subtitle}">Review and approve or reject asset borrow requests</p>
+            </div>
+            <a th:href="@{/movements}" class="btn btn-outline-secondary btn-lg pending-back-btn">
+                <i class="bi bi-arrow-left"></i> <span th:text="#{nav.movements}">Back to Movements</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container pending-container">
+
+    <!-- Flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="#{${successMessage}}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="#{${errorMessage}}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- ─── Results Count ─── -->
+    <div class="pending-results-bar" th:if="${!#lists.isEmpty(pendingMovements)}">
+        <span class="pending-results-count">
+            <i class="bi bi-exclamation-triangle" style="color: var(--warning);"></i>
+            <strong th:text="${#lists.size(pendingMovements)}">0</strong> <span th:text="#{pending.found}">request(s) awaiting approval</span>
+        </span>
+    </div>
+
+    <!-- ─── Pending Table ─── -->
+    <div class="pending-table-wrapper" th:if="${!#lists.isEmpty(pendingMovements)}">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                <tr>
+                    <th th:text="#{pending.table.asset}">Asset Name</th>
+                    <th th:text="#{pending.table.inventoryNo}">Inv. No.</th>
+                    <th th:text="#{pending.table.requester}">Requested By</th>
+                    <th th:text="#{pending.table.requestedDate}">Date Required</th>
+                    <th th:text="#{pending.table.actions}">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="m : ${pendingMovements}">
+                    <td>
+                        <span class="fw-semibold" th:text="${m.asset.modelName}"></span>
+                    </td>
+                    <td>
+                        <span class="pending-inv-number" th:text="${m.asset.inventoryNumber}"></span>
+                    </td>
+                    <td>
+                        <span th:text="${m.user.fullName}"></span>
+                        <small class="text-muted d-block" th:text="'(' + #{${'enum.Role.' + m.user.role}} + ')'"></small>
+                    </td>
+                    <td th:text="${#temporals.format(m.borrowedDate, 'dd MMM yyyy')}"></td>
+                    <td>
+                        <div class="pending-actions">
+                            <form th:action="@{/movements/{id}/approve(id=${m.id})}" method="post">
+                                <button type="submit" class="btn btn-sm btn-success" th:title="#{pending.approve}">
+                                    <i class="bi bi-check-lg"></i> <span th:text="#{pending.approve}">Approve</span>
+                                </button>
+                            </form>
+                            <form th:action="@{/movements/{id}/reject(id=${m.id})}" method="post">
+                                <div class="input-group input-group-sm pending-reject-group">
+                                    <input type="text" name="notes" class="form-control" th:placeholder="#{pending.rejectReason.placeholder}" required>
+                                    <button class="btn btn-danger" type="submit" th:title="#{pending.reject}">
+                                        <i class="bi bi-x-lg"></i> <span th:text="#{pending.reject}">Reject</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ─── Empty State ─── -->
+    <div class="pending-empty" th:if="${#lists.isEmpty(pendingMovements)}">
+        <div class="pending-empty-icon">
+            <i class="bi bi-check-circle"></i>
+        </div>
+        <h3 th:text="#{pending.empty.title}">All Caught Up!</h3>
+        <p><span th:text="#{pending.empty.text}">There are no pending borrow requests to review.</span><br/><span th:text="#{pending.empty.text2}">New requests will appear here automatically.</span></p>
+        <a th:href="@{/movements}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> <span th:text="#{nav.movements}">Back to Movements</span>
+        </a>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

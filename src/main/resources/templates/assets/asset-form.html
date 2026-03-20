@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${asset.id == null} ? #{assetForm.titleNew} : #{assetForm.titleEdit})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0">
+                        <i th:class="${asset.id == null} ? 'bi bi-plus-circle' : 'bi bi-pencil'"></i>
+                        <span th:text="${asset.id == null} ? #{assetForm.titleNew} : #{assetForm.titleEdit}">Asset Form</span>
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/assets/save}" th:object="${asset}" method="post">
+
+                        <!-- Hidden id for edits -->
+                        <input type="hidden" th:field="*{id}"/>
+
+                        <!-- Duplicate Inventory Number Error -->
+                        <div class="alert alert-danger" th:if="${duplicateError}">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <span th:text="${duplicateError}"></span>
+                        </div>
+
+                        <!-- Inventory Number -->
+                        <div class="mb-3">
+                            <label for="inventoryNumber" class="form-label" th:text="#{assetForm.inventoryNumber}">Inventory Number *</label>
+                            <input type="text" id="inventoryNumber" th:field="*{inventoryNumber}"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('inventoryNumber')} ? 'is-invalid'"
+                                   th:placeholder="#{assetForm.inventoryNumber.placeholder}"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('inventoryNumber')}"
+                                 th:errors="*{inventoryNumber}"></div>
+                        </div>
+
+                        <!-- Serial Number -->
+                        <div class="mb-3">
+                            <label for="serialNumber" class="form-label" th:text="#{assetForm.serialNumber}">Serial Number</label>
+                            <input type="text" id="serialNumber" th:field="*{serialNumber}"
+                                   class="form-control" th:placeholder="#{assetForm.serialNumber.placeholder}"/>
+                        </div>
+
+                        <!-- Model Name -->
+                        <div class="mb-3">
+                            <label for="modelName" class="form-label" th:text="#{assetForm.modelName}">Model Name *</label>
+                            <input type="text" id="modelName" th:field="*{modelName}"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('modelName')} ? 'is-invalid'"
+                                   th:placeholder="#{assetForm.modelName.placeholder}"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('modelName')}"
+                                 th:errors="*{modelName}"></div>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="mb-3">
+                            <label for="category" class="form-label" th:text="#{assetForm.category}">Category</label>
+                            <input type="text" id="category" th:field="*{category}"
+                                   class="form-control" th:placeholder="#{assetForm.category.placeholder}"/>
+                        </div>
+
+                        <div class="row">
+                            <!-- Purchase Date -->
+                            <div class="col-md-6 mb-3">
+                                <label for="purchaseDate" class="form-label" th:text="#{assetForm.purchaseDate}">Purchase Date</label>
+                                <input type="date" id="purchaseDate" th:field="*{purchaseDate}"
+                                       class="form-control"/>
+                            </div>
+
+                            <!-- Warranty End Date -->
+                            <div class="col-md-6 mb-3">
+                                <label for="warrantyEndDate" class="form-label" th:text="#{assetForm.warrantyEndDate}">Warranty End Date</label>
+                                <input type="date" id="warrantyEndDate" th:field="*{warrantyEndDate}"
+                                       class="form-control"/>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Condition -->
+                            <div class="col-md-6 mb-3">
+                                <label for="itemCondition" class="form-label" th:text="#{assetForm.condition}">Condition *</label>
+                                <select id="itemCondition" th:field="*{itemCondition}" class="form-select"
+                                        th:classappend="${#fields.hasErrors('itemCondition')} ? 'is-invalid'">
+                                    <option value="" th:text="#{assetForm.condition.placeholder}">-- Select condition --</option>
+                                    <option th:each="c : ${conditions}" th:value="${c}" th:text="#{${'enum.AssetCondition.' + c}}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('itemCondition')}"
+                                     th:errors="*{itemCondition}"></div>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label" th:text="#{assetForm.status}">Status *</label>
+                                <select id="status" th:field="*{status}" class="form-select"
+                                        th:classappend="${#fields.hasErrors('status')} ? 'is-invalid'">
+                                    <option value="" th:text="#{assetForm.status.placeholder}">-- Select status --</option>
+                                    <option th:each="s : ${statuses}" th:value="${s}" th:text="#{${'enum.AssetStatus.' + s}}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('status')}"
+                                     th:errors="*{status}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label" th:text="#{assetForm.description}">Description</label>
+                            <textarea id="description" th:field="*{description}"
+                                   class="form-control" rows="3"
+                                   th:placeholder="#{assetForm.description.placeholder}"></textarea>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-3">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-lg"></i> <span th:text="#{assetForm.save}">Save</span>
+                            </button>
+                            <a th:href="@{/assets}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> <span th:text="#{assetForm.cancel}">Cancel</span>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

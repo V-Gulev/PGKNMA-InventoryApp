@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(#{assets.title})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<!-- ─── Page Hero ─── -->
+<div class="assets-hero">
+    <div class="container">
+        <div class="assets-hero-content">
+            <div class="assets-hero-text">
+                <h1 class="assets-title">
+                    <span class="assets-title-icon"><i class="bi bi-collection-fill"></i></span>
+                    <span th:text="#{assets.title}">Asset Inventory</span>
+                </h1>
+                <p class="assets-subtitle" th:text="#{assets.subtitle}">Browse, manage, and track all registered assets</p>
+            </div>
+            <a th:href="@{/assets/new}" class="btn btn-primary btn-lg assets-add-btn"
+               sec:authorize="hasAnyRole('MANAGER', 'ADMIN')">
+                <i class="bi bi-plus-circle"></i> <span th:text="#{assets.addAsset}">Add Asset</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container assets-container">
+
+    <!-- Flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="#{${successMessage}}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="#{${errorMessage}}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- ─── Search & Filter ─── -->
+    <div class="assets-filter-card">
+        <div class="assets-filter-header">
+            <i class="bi bi-funnel"></i> <span th:text="#{assets.filter}">Filter &amp; Search</span>
+        </div>
+        <form th:action="@{/assets}" method="get" class="assets-filter-form">
+            <div class="assets-filter-row">
+                <div class="assets-filter-field">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" name="keyword" class="form-control"
+                               th:placeholder="#{assets.search.placeholder}"
+                               th:value="${keyword}">
+                    </div>
+                </div>
+                <div class="assets-filter-field">
+                    <select name="status" class="form-select">
+                        <option value="" th:text="#{assets.allStatuses}">All Statuses</option>
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="#{${'enum.AssetStatus.' + s}}"
+                                th:selected="${s == selectedStatus}"></option>
+                    </select>
+                </div>
+                <div class="assets-filter-field">
+                    <select name="condition" class="form-select">
+                        <option value="" th:text="#{assets.allConditions}">All Conditions</option>
+                        <option th:each="c : ${conditions}" th:value="${c}" th:text="#{${'enum.AssetCondition.' + c}}"
+                                th:selected="${c == selectedCondition}"></option>
+                    </select>
+                </div>
+                <div class="assets-filter-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel-fill"></i> <span th:text="#{assets.apply}">Apply</span>
+                    </button>
+                    <a th:href="@{/assets}" class="btn btn-outline-secondary" th:title="#{assets.clearFilters}">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- ─── Results Count ─── -->
+    <div class="assets-results-bar" th:if="${!#lists.isEmpty(assets)}">
+        <span class="assets-results-count">
+            <i class="bi bi-box-seam"></i>
+            <strong th:text="${#lists.size(assets)}">0</strong> <span th:text="#{assets.found}">asset(s) found</span>
+        </span>
+    </div>
+
+    <!-- ─── Asset Table ─── -->
+    <div class="assets-table-wrapper" th:if="${!#lists.isEmpty(assets)}">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                <tr>
+                    <th th:text="#{assets.table.index}">#</th>
+                    <th th:text="#{assets.table.inventoryNo}">Inventory No.</th>
+                    <th th:text="#{assets.table.serialNo}">Serial No.</th>
+                    <th th:text="#{assets.table.model}">Model</th>
+                    <th th:text="#{assets.table.category}">Category</th>
+                    <th th:text="#{assets.table.condition}">Condition</th>
+                    <th th:text="#{assets.table.status}">Status</th>
+                    <th th:text="#{assets.table.addedDate}">Added Date</th>
+                    <th th:text="#{assets.table.actions}">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="asset, iter : ${assets}">
+                    <td class="text-muted fw-medium" th:text="${iter.index + 1}"></td>
+                    <td>
+                        <span class="assets-inv-number" th:text="${asset.inventoryNumber}"></span>
+                    </td>
+                    <td class="text-secondary" th:text="${asset.serialNumber}"></td>
+                    <td>
+                        <span class="fw-semibold" th:text="${asset.modelName}"></span>
+                    </td>
+                    <td th:text="${asset.category}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${asset.itemCondition.name() == 'NEW'} ? 'bg-success' :
+                                              (${asset.itemCondition.name() == 'USED'} ? 'bg-info' :
+                                              (${asset.itemCondition.name() == 'DAMAGED'} ? 'bg-warning' : 'bg-danger'))"
+                              th:text="#{${'enum.AssetCondition.' + asset.itemCondition}}"></span>
+                    </td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${asset.status.name() == 'AVAILABLE'} ? 'bg-success' :
+                                              (${asset.status.name() == 'IN_USE'} ? 'bg-warning' :
+                                              (${asset.status.name() == 'RESERVED'} ? 'bg-info' : 'bg-secondary'))"
+                              th:text="#{${'enum.AssetStatus.' + asset.status}}"></span>
+                    </td>
+                    <td class="text-secondary" th:text="${asset.createdAt != null ? #temporals.format(asset.createdAt, 'dd MMM yyyy') : '—'}"></td>
+                    <td class="text-nowrap">
+                        <div class="assets-table-actions">
+                            <a th:href="@{/assets/{id}(id=${asset.id})}"
+                               class="btn btn-sm btn-outline-secondary" th:title="#{assets.viewDetails}">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a th:href="@{/assets/{id}/history(id=${asset.id})}"
+                               class="btn btn-sm btn-outline-info" th:title="#{assets.history}">
+                                <i class="bi bi-clock-history"></i>
+                            </a>
+                            <a th:href="@{/assets/{id}/edit(id=${asset.id})}"
+                               class="btn btn-sm btn-outline-primary" th:title="#{assets.edit}"
+                               sec:authorize="hasAnyRole('MANAGER', 'ADMIN')">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a th:href="@{/assets/{id}/delete(id=${asset.id})}"
+                               class="btn btn-sm btn-outline-danger" th:title="#{assets.delete}"
+                               th:onclick="'return confirm(\'' + #{assets.deleteConfirm} + '\')'"
+                               sec:authorize="hasAnyRole('MANAGER', 'ADMIN')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                            <!-- Quick Borrow Action -->
+                            <a th:href="@{/movements/borrow(assetId=${asset.id})}"
+                               class="btn btn-sm btn-outline-success quick-borrow-btn" th:title="#{assets.quickBorrow}"
+                               th:if="${asset.status.name() == 'AVAILABLE'}"
+                               sec:authorize="hasAnyRole('MANAGER', 'ADMIN', 'TEACHER', 'STUDENT')">
+                                <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ─── Empty State ─── -->
+    <div class="assets-empty" th:if="${#lists.isEmpty(assets)}">
+        <div class="assets-empty-icon">
+            <i class="bi bi-collection"></i>
+        </div>
+        <h3 th:text="#{assets.empty.title}">No Assets Found</h3>
+        <p><span th:text="#{assets.empty.text}">No assets match your current filters.</span><br/><span th:text="#{assets.empty.text2}">Try adjusting your search or add a new asset.</span></p>
+        <div class="assets-empty-actions">
+            <a th:href="@{/assets}" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle"></i> <span th:text="#{assets.clearFilters}">Clear Filters</span>
+            </a>
+            <a th:href="@{/assets/new}" class="btn btn-primary"
+               sec:authorize="hasAnyRole('MANAGER', 'ADMIN')">
+                <i class="bi bi-plus-circle"></i> <span th:text="#{assets.addAsset}">Add Asset</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

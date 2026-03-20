@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(#{admin.title})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<!-- ─── Page Hero ─── -->
+<div class="admin-hero">
+    <div class="container">
+        <div class="admin-hero-content">
+            <div class="admin-hero-text">
+                <h1 class="admin-title">
+                    <span class="admin-title-icon"><i class="bi bi-shield-lock"></i></span>
+                    <span th:text="#{admin.title}">Admin Panel</span>
+                </h1>
+                <p class="admin-subtitle" th:text="#{admin.subtitle}">Manage users, monitor assets, and oversee active borrows</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container admin-container">
+
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i><span th:text="#{${successMessage}}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i><span th:text="#{${errorMessage}}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- ─── Stats Grid ─── -->
+    <div class="admin-stats">
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background: rgba(99,102,241,0.12); color: var(--accent);">
+                <i class="bi bi-collection"></i>
+            </div>
+            <div class="dash-stat-info">
+                <span class="dash-stat-value" th:text="${totalAssets}">0</span>
+                <span class="dash-stat-label" th:text="#{admin.totalAssets}">Total Assets</span>
+            </div>
+        </div>
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background: rgba(34,197,94,0.12); color: var(--success);">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="dash-stat-info">
+                <span class="dash-stat-value" th:text="${availableAssets}">0</span>
+                <span class="dash-stat-label" th:text="#{admin.available}">Available</span>
+            </div>
+        </div>
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background: rgba(245,158,11,0.12); color: var(--warning);">
+                <i class="bi bi-person-raised-hand"></i>
+            </div>
+            <div class="dash-stat-info">
+                <span class="dash-stat-value" th:text="${inUseAssets}">0</span>
+                <span class="dash-stat-label" th:text="#{admin.inUse}">In Use</span>
+            </div>
+        </div>
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background: rgba(107,114,128,0.12); color: var(--text-muted);">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <div class="dash-stat-info">
+                <span class="dash-stat-value" th:text="${reservedAssets}">0</span>
+                <span class="dash-stat-label" th:text="#{admin.reserved}">Reserved</span>
+            </div>
+        </div>
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background: rgba(59,130,246,0.12); color: var(--info);">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="dash-stat-info">
+                <span class="dash-stat-value" th:text="${totalUsers}">0</span>
+                <span class="dash-stat-label" th:text="#{admin.registeredUsers}">Registered Users</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Users Table ─── -->
+    <div class="admin-section-card">
+        <div class="admin-section-header">
+            <h3 class="admin-section-title">
+                <i class="bi bi-people"></i> <span th:text="#{admin.allUsers}">All Users</span>
+            </h3>
+        </div>
+        <div class="admin-section-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                    <tr>
+                        <th th:text="#{admin.users.table.index}">#</th>
+                        <th th:text="#{admin.users.table.username}">Username</th>
+                        <th th:text="#{admin.users.table.fullName}">Full Name</th>
+                        <th th:text="#{admin.users.table.role}">Role</th>
+                        <th th:text="#{admin.users.table.registered}">Created At</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="u, iter : ${users}">
+                        <td class="text-muted fw-medium" th:text="${iter.index + 1}"></td>
+                        <td>
+                            <span class="fw-semibold" th:text="${u.username}"></span>
+                        </td>
+                        <td th:text="${u.fullName}"></td>
+                        <td>
+                            <!-- If the user is the currently logged-in admin, show static badge to prevent self-lockout -->
+                            <span th:if="${u.username == #authentication.name}" class="badge bg-danger" th:text="#{${'enum.Role.' + u.role}}"></span>
+
+                            <!-- If the user is someone else, show the form -->
+                            <form th:unless="${u.username == #authentication.name}" th:action="@{/admin/users/{id}/role(id=${u.id})}" method="post" class="admin-role-form">
+                                <select name="role" class="form-select form-select-sm" required>
+                                    <option value="STUDENT" th:selected="${u.role.name() == 'STUDENT'}" th:text="#{enum.Role.STUDENT}"></option>
+                                    <option value="TEACHER" th:selected="${u.role.name() == 'TEACHER'}" th:text="#{enum.Role.TEACHER}"></option>
+                                    <option value="MANAGER" th:selected="${u.role.name() == 'MANAGER'}" th:text="#{enum.Role.MANAGER}"></option>
+                                    <option value="ADMIN" th:selected="${u.role.name() == 'ADMIN'}" th:text="#{enum.Role.ADMIN}"></option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-outline-primary" th:text="#{admin.users.update}">Update</button>
+                            </form>
+                        </td>
+                        <td class="text-secondary" th:text="${u.createdAt != null} ? ${#temporals.format(u.createdAt, 'dd MMM yyyy HH:mm')} : #{common.noData}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Pending Manager Requests ─── -->
+    <div class="admin-section-card" style="margin-top: 1.5rem;" th:if="${pendingManagerRequests != null and !pendingManagerRequests.isEmpty()}">
+        <div class="admin-section-header">
+            <h3 class="admin-section-title">
+                <i class="bi bi-person-plus"></i> <span th:text="#{admin.managerRequests.title}">Pending Manager Requests</span>
+            </h3>
+            <span class="badge bg-danger admin-section-badge" th:text="${pendingManagerRequests.size()}">0</span>
+        </div>
+        <div class="admin-section-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                    <tr>
+                        <th th:text="#{admin.users.table.index}">#</th>
+                        <th th:text="#{admin.managerRequests.table.username}">Username</th>
+                        <th th:text="#{admin.managerRequests.table.email}">Email</th>
+                        <th th:text="#{admin.managerRequests.table.fullName}">Full Name</th>
+                        <th th:text="#{admin.managerRequests.table.requested}">Requested At</th>
+                        <th th:text="#{admin.users.table.actions}">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="req, iter : ${pendingManagerRequests}">
+                        <td class="text-muted fw-medium" th:text="${iter.index + 1}"></td>
+                        <td><span class="fw-semibold" th:text="${req.username}"></span></td>
+                        <td th:text="${req.email}"></td>
+                        <td th:text="${req.fullName}"></td>
+                        <td class="text-secondary" th:text="${req.createdAt != null} ? ${#temporals.format(req.createdAt, 'dd MMM yyyy HH:mm')} : #{common.noData}"></td>
+                        <td>
+                            <form th:action="@{/admin/requests/{id}/approve(id=${req.id})}" method="post" style="display:inline-block;">
+                                <button type="submit" class="btn btn-sm btn-success" th:text="#{admin.managerRequests.approve}">Approve</button>
+                            </form>
+                            <form th:action="@{/admin/requests/{id}/reject(id=${req.id})}" method="post" style="display:inline-block; margin-left: 0.25rem;">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{admin.managerRequests.reject}">Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Active Borrows ─── -->
+    <div class="admin-section-card" style="margin-top: 1.5rem;">
+        <div class="admin-section-header">
+            <h3 class="admin-section-title">
+                <i class="bi bi-arrow-left-right"></i> <span th:text="#{admin.activeBorrows}">Active Borrows</span>
+            </h3>
+            <span class="badge bg-warning admin-section-badge" th:text="${activeMovements}">0</span>
+        </div>
+        <div class="admin-section-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                    <tr>
+                        <th th:text="#{admin.borrows.table.index}">#</th>
+                        <th th:text="#{admin.borrows.table.asset}">Asset</th>
+                        <th th:text="#{admin.borrows.table.borrower}">User</th>
+                        <th th:text="#{admin.borrows.table.borrowedDate}">Borrowed Date</th>
+                        <th th:text="#{admin.borrows.table.status}">Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="m, iter : ${allMovements}" th:if="${m.returnedDate == null}">
+                        <td class="text-muted fw-medium" th:text="${iter.index + 1}"></td>
+                        <td>
+                            <span class="fw-semibold" th:text="${m.asset.modelName}"></span>
+                            <small class="text-muted d-block" th:text="'#' + ${m.asset.inventoryNumber}"></small>
+                        </td>
+                        <td th:text="${m.user.fullName}"></td>
+                        <td class="text-secondary" th:text="${#temporals.format(m.borrowedDate, 'dd MMM yyyy HH:mm')}"></td>
+                        <td><span class="badge bg-warning" th:text="#{myItems.active}">Active</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

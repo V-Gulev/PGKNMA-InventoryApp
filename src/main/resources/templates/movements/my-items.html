@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{myItems.title})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<!-- ─── Page Hero ─── -->
+<div class="my-items-hero">
+    <div class="container">
+        <div class="my-items-hero-content">
+            <div class="my-items-hero-text">
+                <h1 class="my-items-title">
+                    <span class="my-items-title-icon"><i class="bi bi-person-badge-fill"></i></span>
+                    <span th:text="#{myItems.title}">My Borrowed Items</span>
+                </h1>
+                <p class="my-items-subtitle" th:text="#{myItems.subtitle}">Track and manage all items currently in your possession</p>
+            </div>
+            <a th:href="@{/movements/borrow}" class="btn btn-primary btn-lg my-items-borrow-btn">
+                <i class="bi bi-box-arrow-up-right"></i> <span th:text="#{dash.borrowAsset}">Borrow New Asset</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container my-items-container">
+
+    <!-- Flash message -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="#{${successMessage}}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="#{${errorMessage}}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- ─── Stats Row ─── -->
+    <div class="my-items-stats">
+        <div class="my-items-stat-card">
+            <div class="my-items-stat-icon" style="background: rgba(99,102,241,0.12); color: var(--accent);">
+                <i class="bi bi-collection"></i>
+            </div>
+            <div class="my-items-stat-info">
+                <span class="my-items-stat-value" th:text="${#lists.size(movements)}">0</span>
+                <span class="my-items-stat-label" th:text="#{myItems.totalItems}">Total Items</span>
+            </div>
+        </div>
+        <div class="my-items-stat-card">
+            <div class="my-items-stat-icon" style="background: rgba(245,158,11,0.12); color: var(--warning);">
+                <i class="bi bi-play-circle"></i>
+            </div>
+            <div class="my-items-stat-info">
+                <span class="my-items-stat-value"
+                      th:with="activeCount=${movements.?[!borrowedDate.isAfter(T(java.time.LocalDate).now())]}"
+                      th:text="${#lists.size(activeCount)}">0</span>
+                <span class="my-items-stat-label" th:text="#{myItems.active}">Active</span>
+            </div>
+        </div>
+        <div class="my-items-stat-card">
+            <div class="my-items-stat-icon" style="background: rgba(59,130,246,0.12); color: var(--info);">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <div class="my-items-stat-info">
+                <span class="my-items-stat-value"
+                      th:with="scheduledCount=${movements.?[borrowedDate.isAfter(T(java.time.LocalDate).now())]}"
+                      th:text="${#lists.size(scheduledCount)}">0</span>
+                <span class="my-items-stat-label" th:text="#{myItems.scheduled}">Scheduled</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Items Grid ─── -->
+    <div class="my-items-grid" th:if="${!#lists.isEmpty(movements)}">
+        <div class="my-items-card" th:each="m, iter : ${movements}"
+             th:classappend="${m.borrowedDate.isAfter(T(java.time.LocalDate).now())} ? 'my-items-card--scheduled' : 'my-items-card--active'">
+
+            <!-- Card Header -->
+            <div class="my-items-card-header">
+                <div class="my-items-card-asset-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="my-items-card-title-group">
+                    <h3 class="my-items-card-name" th:text="${m.asset.modelName}">Asset Name</h3>
+                    <span class="my-items-card-inv" th:text="'#' + ${m.asset.inventoryNumber}">INV-001</span>
+                </div>
+                <!-- Pending approval -->
+                <span th:if="${m.status != null && m.status.name() == 'PENDING'}"
+                      class="badge bg-secondary my-items-card-badge">
+                    <i class="bi bi-hourglass-split"></i> <span th:text="#{${'enum.MovementStatus.PENDING'}}">Pending</span>
+                </span>
+                <!-- Scheduled (approved, future date) -->
+                <span th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.borrowedDate.isAfter(T(java.time.LocalDate).now())}"
+                      class="badge bg-info my-items-card-badge">
+                    <i class="bi bi-calendar-check"></i> <span th:text="#{myItems.scheduled}">Scheduled</span>
+                </span>
+                <!-- Active (approved, today or past) -->
+                <span th:if="${(m.status == null || m.status.name() == 'APPROVED') && !m.borrowedDate.isAfter(T(java.time.LocalDate).now())}"
+                      class="badge bg-warning my-items-card-badge">
+                    <i class="bi bi-play-circle"></i> <span th:text="#{myItems.active}">Active</span>
+                </span>
+            </div>
+
+            <!-- Card Details -->
+            <div class="my-items-card-details">
+                <div class="my-items-card-detail">
+                    <span class="my-items-card-detail-label"><i class="bi bi-tag"></i> <span th:text="#{assets.table.category}">Category</span></span>
+                    <span class="my-items-card-detail-value" th:text="${m.asset.category}">Category</span>
+                </div>
+                <div class="my-items-card-detail">
+                    <span class="my-items-card-detail-label"><i class="bi bi-calendar3"></i> <span th:text="#{myItems.borrowedDate}">Borrowed</span></span>
+                    <span class="my-items-card-detail-value" th:text="${#temporals.format(m.borrowedDate, 'dd MMM yyyy')}">01 Jan 2025</span>
+                </div>
+            </div>
+
+            <!-- Card Actions -->
+            <div class="my-items-card-actions">
+                <!-- Pending → info message -->
+                <div th:if="${m.status != null && m.status.name() == 'PENDING'}" class="movements-card-action-info">
+                    <i class="bi bi-hourglass"></i> <span th:text="#{movements.awaitingApproval}">Awaiting manager approval</span>
+                </div>
+
+                <!-- Active item → return form (only for approved) -->
+                <form th:if="${(m.status == null || m.status.name() == 'APPROVED') && !m.borrowedDate.isAfter(T(java.time.LocalDate).now())}"
+                      th:action="@{/movements/return/{id}(id=${m.asset.id})}" method="post"
+                      class="my-items-return-form">
+                    <div class="my-items-return-fields">
+                        <select name="newCondition" class="form-select form-select-sm" title="Update condition">
+                            <option th:each="c : ${conditions}"
+                                    th:value="${c}" th:text="#{${'enum.AssetCondition.' + c}}"
+                                    th:selected="${c == m.asset.itemCondition}"></option>
+                        </select>
+                        <input type="text" name="notes" class="form-control form-control-sm"
+                               th:placeholder="#{movements.notes.placeholder}"/>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-sm my-items-return-btn">
+                        <i class="bi bi-box-arrow-in-down"></i> <span th:text="#{myItems.return}">Return Item</span>
+                    </button>
+                </form>
+
+                <!-- Scheduled item → cancel (only for approved) -->
+                <form th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.borrowedDate.isAfter(T(java.time.LocalDate).now())}"
+                      th:action="@{/movements/cancel/{id}(id=${m.asset.id})}" method="post"
+                      onsubmit="return confirm('Cancel this scheduled borrow?')">
+                    <button type="submit" class="btn btn-outline-danger btn-sm my-items-cancel-btn">
+                        <i class="bi bi-x-circle"></i> <span th:text="#{movements.cancelReservation}">Cancel Reservation</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Empty State ─── -->
+    <div class="my-items-empty" th:if="${#lists.isEmpty(movements)}">
+        <div class="my-items-empty-icon">
+            <i class="bi bi-inbox"></i>
+        </div>
+        <h3 th:text="#{myItems.empty.title}">No Borrowed Items</h3>
+        <p><span th:text="#{myItems.empty.text}">You don't have any items checked out right now.</span><br/><span th:text="#{myItems.empty.text2}">Browse the asset catalog to borrow something.</span></p>
+        <a th:href="@{/movements/borrow}" class="btn btn-primary">
+            <i class="bi bi-box-arrow-up-right"></i> <span th:text="#{myItems.browseAssets}">Borrow an Asset</span>
+        </a>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{register.title})}"></head>
+<body class="auth-page">
+<div class="auth-card">
+    <div class="auth-icon-header">
+        <i class="bi bi-person-plus"></i>
+    </div>
+    <h2 class="auth-title" th:text="#{register.title}">Create Account</h2>
+    <p class="auth-subtitle" th:text="#{register.subtitle}">Join the School Inventory system</p>
+
+    <!-- Server-side error -->
+    <div th:if="${registrationError}" class="alert alert-danger alert-sm">
+        <i class="bi bi-exclamation-triangle me-1"></i><span th:text="#{${registrationError}}"></span>
+    </div>
+
+    <form th:action="@{/register}" th:object="${user}" method="post" class="auth-form">
+        <div class="auth-field">
+            <label class="auth-label" th:text="#{register.username}">Username</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-person auth-input-icon"></i>
+                <input type="text" th:field="*{username}" class="form-control auth-input"
+                       th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                       th:placeholder="#{register.username.placeholder}"/>
+            </div>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+        </div>
+        <div class="auth-field">
+            <label class="auth-label" th:text="#{register.email}">Email</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-envelope auth-input-icon"></i>
+                <input type="email" th:field="*{email}" class="form-control auth-input"
+                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                       th:placeholder="#{register.email.placeholder}"/>
+            </div>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+        </div>
+        <div class="auth-field">
+            <label class="auth-label" th:text="#{register.fullName}">Full Name</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-card-text auth-input-icon"></i>
+                <input type="text" th:field="*{fullName}" class="form-control auth-input"
+                       th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'"
+                       th:placeholder="#{register.fullName.placeholder}"/>
+            </div>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+        </div>
+        <div class="auth-field">
+            <label class="auth-label" th:text="#{register.password}">Password</label>
+            <div class="auth-input-wrap">
+                <i class="bi bi-lock auth-input-icon"></i>
+                <input type="password" th:field="*{password}" id="registerPassword" class="form-control auth-input"
+                       th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                       th:placeholder="#{register.password.placeholder}"/>
+                <i class="bi bi-eye-slash password-toggle-icon" onclick="togglePasswordVisibility('registerPassword', this)"></i>
+            </div>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+        </div>
+        <div class="auth-field">
+            <label class="auth-label" th:text="#{register.role}">Role</label>
+            <select th:field="*{role}" class="form-select auth-input"
+                    th:classappend="${#fields.hasErrors('role')} ? 'is-invalid'">
+                <option value="" th:text="#{register.role.placeholder}">-- Select a role --</option>
+                <option th:each="r : ${roles}" th:value="${r}" th:text="#{${'enum.Role.' + r}}"></option>
+            </select>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></div>
+        </div>
+        <button type="submit" class="btn btn-primary auth-submit" th:text="#{register.submit}">Register</button>
+    </form>
+
+    <div class="auth-footer">
+        <span th:text="#{register.haveAccount}">Already have an account?</span>
+        <a th:href="@{/login}" th:text="#{register.signIn}">Sign in</a>
+    </div>
+</div>
+</body>
+</html>

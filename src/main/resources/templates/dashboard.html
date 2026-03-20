@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{dash.title})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<!-- ─── Page Hero ─── -->
+<div class="dash-hero">
+    <div class="container">
+        <div class="dash-hero-content">
+            <div class="dash-hero-text">
+                <h1 class="dash-title">
+                    <span class="dash-title-icon"><i class="bi bi-speedometer2"></i></span>
+                    <span th:text="#{dash.title}">Dashboard</span>
+                </h1>
+                <p class="dash-subtitle" th:if="${currentUser != null}"
+                   th:text="#{dash.greeting} + ', ' + ${currentUser.fullName} + '!'">Welcome!</p>
+            </div>
+            <div class="dash-hero-actions">
+                <a th:href="@{/movements/borrow}" class="btn btn-primary btn-lg dash-action-btn"
+                   th:if="${currentUserRole == 'ADMIN' || currentUserRole == 'TEACHER' || currentUserRole == 'MANAGER' || currentUserRole == 'STUDENT'}">
+                    <i class="bi bi-box-arrow-up-right"></i> <span th:text="#{dash.borrowAsset}">Borrow Asset</span>
+                </a>
+                <a th:href="@{/assets}" class="btn btn-outline-secondary btn-lg dash-action-btn">
+                    <i class="bi bi-collection"></i> <span th:text="#{dash.viewAssets}">View Assets</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container dash-container">
+
+    <!-- ─── Stats Grid ─── -->
+    <div class="dash-stats">
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background: rgba(99,102,241,0.12); color: var(--accent);">
+                <i class="bi bi-collection"></i>
+            </div>
+            <div class="dash-stat-info">
+                <span class="dash-stat-value" th:text="${totalAssets}">0</span>
+                <span class="dash-stat-label" th:text="#{dash.totalAssets}">Total Assets</span>
+            </div>
+        </div>
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background: rgba(34,197,94,0.12); color: var(--success);">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="dash-stat-info">
+                <span class="dash-stat-value" th:text="${availableAssets}">0</span>
+                <span class="dash-stat-label" th:text="#{dash.available}">Available</span>
+            </div>
+        </div>
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background: rgba(245,158,11,0.12); color: var(--warning);">
+                <i class="bi bi-person-raised-hand"></i>
+            </div>
+            <div class="dash-stat-info">
+                <span class="dash-stat-value" th:text="${inUseAssets}">0</span>
+                <span class="dash-stat-label" th:text="#{dash.inUse}">In Use</span>
+            </div>
+        </div>
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon" style="background: rgba(59,130,246,0.12); color: var(--info);">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <div class="dash-stat-info">
+                <span class="dash-stat-value" th:text="${reservedAssets}">0</span>
+                <span class="dash-stat-label" th:text="#{dash.reserved}">Reserved</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Main Content ─── -->
+    <div class="dash-content">
+
+        <!-- Left: Recent Activity -->
+        <div class="dash-main">
+            <div class="dash-section-card">
+                <div class="dash-section-header">
+                    <h3 class="dash-section-title">
+                        <i class="bi bi-clock-history"></i> <span th:text="#{dash.recentActivity}">Recent Activity</span>
+                    </h3>
+                    <a th:href="@{/movements}" class="btn btn-sm btn-outline-secondary" th:text="#{dash.viewAssets}">View All</a>
+                </div>
+                <div class="dash-section-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-dark">
+                            <tr>
+                                <th th:text="#{dash.asset}">Asset</th>
+                                <th th:text="#{dash.user}">User</th>
+                                <th th:text="#{dash.date}">Date</th>
+                                <th th:text="#{dash.status}">Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="m : ${recentMovements}" th:if="${recentMovements != null && !recentMovements.isEmpty()}">
+                                <td>
+                                    <span class="fw-semibold" th:text="${m.asset.modelName}"></span>
+                                </td>
+                                <td class="text-secondary" th:text="${m.user.fullName}"></td>
+                                <td class="text-secondary" th:text="${#temporals.format(m.borrowedDate, 'dd MMM yyyy')}"></td>
+                                <td>
+                                    <span th:if="${m.status != null && m.status.name() == 'PENDING'}" class="badge bg-warning" th:text="#{${'enum.MovementStatus.PENDING'}}">Pending</span>
+                                    <span th:if="${m.status != null && m.status.name() == 'REJECTED'}" class="badge bg-danger" th:text="#{${'enum.MovementStatus.REJECTED'}}">Rejected</span>
+                                    <span th:if="${m.status == null || m.status.name() == 'APPROVED'}">
+                                        <span th:if="${m.returnedDate != null}" class="badge bg-secondary" th:text="#{movements.filter.returned}">Returned</span>
+                                        <span th:if="${m.returnedDate == null && m.borrowedDate.isAfter(T(java.time.LocalDate).now())}" class="badge bg-info" th:text="#{myItems.scheduled}">Scheduled</span>
+                                        <span th:if="${m.returnedDate == null && !m.borrowedDate.isAfter(T(java.time.LocalDate).now())}" class="badge bg-success" th:text="#{myItems.active}">Active</span>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr th:if="${recentMovements == null || recentMovements.isEmpty()}">
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    <i class="bi bi-clock fs-4 d-block mb-1"></i>
+                                    <span th:text="#{dash.noRecords}">No recent activity detected.</span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Side Widgets -->
+        <div class="dash-sidebar">
+
+            <!-- My Borrowed Items (Student & Teacher) -->
+            <div class="dash-section-card dash-borrowed-widget"
+                 th:if="${currentUserRole == 'STUDENT' || currentUserRole == 'TEACHER'}">
+                <div class="dash-borrowed-body">
+                    <div class="dash-borrowed-icon">
+                        <i class="bi bi-journal-bookmark"></i>
+                    </div>
+                    <div class="dash-borrowed-info">
+                        <span class="dash-borrowed-count" th:text="${myBorrowedItems ?: 0}">0</span>
+                        <span class="dash-borrowed-label" th:text="#{dash.myBorrowed}">My Borrowed Items</span>
+                    </div>
+                </div>
+                <a th:href="@{/movements/my-items}" class="btn btn-info dash-borrowed-btn">
+                    <i class="bi bi-eye"></i> <span th:text="#{nav.myItems}">Manage My Items</span>
+                </a>
+            </div>
+
+            <!-- Maintenance Alert (Admin/Manager) -->
+            <div class="dash-section-card" th:if="${currentUserRole == 'ADMIN' || currentUserRole == 'MANAGER'}">
+                <div class="dash-section-header dash-section-header--danger">
+                    <h3 class="dash-section-title">
+                        <i class="bi bi-tools"></i> <span th:text="#{dash.maintenance}">Needs Maintenance</span>
+                    </h3>
+                </div>
+                <div class="dash-maintenance-list">
+                    <a th:each="item : ${maintenanceItemsList}"
+                       th:href="@{/assets/{id}/edit(id=${item.id})}"
+                       class="dash-maintenance-item">
+                        <div class="dash-maintenance-item-info">
+                            <span class="dash-maintenance-item-name" th:text="${item.modelName}">Asset Name</span>
+                            <span class="dash-maintenance-item-inv" th:text="${item.inventoryNumber}">INV-001</span>
+                        </div>
+                        <i class="bi bi-chevron-right dash-maintenance-arrow"></i>
+                    </a>
+                    <div th:if="${maintenanceItemsList == null || maintenanceItemsList.isEmpty()}"
+                         class="dash-maintenance-empty">
+                        <i class="bi bi-check-circle"></i>
+                        All systems normal. Nothing in maintenance.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Maintenance Stat (Student/Teacher) -->
+            <div class="dash-stat-card dash-stat-card--maintenance"
+                 th:if="${currentUserRole == 'STUDENT' || currentUserRole == 'TEACHER'}">
+                <div class="dash-stat-icon" style="background: rgba(107,114,128,0.12); color: var(--text-muted);">
+                    <i class="bi bi-tools"></i>
+                </div>
+                <div class="dash-stat-info">
+                    <span class="dash-stat-value" th:text="${maintenanceAssets}">0</span>
+                    <span class="dash-stat-label" th:text="#{dash.maintenance}">In Maintenance</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>
