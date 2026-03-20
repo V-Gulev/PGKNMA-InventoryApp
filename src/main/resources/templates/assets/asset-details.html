@@ -28,151 +28,172 @@
 
     <div class="asset-details-grid">
 
-        <!-- ─── Asset Image ─── -->
-        <div class="asset-details-section-card">
-            <div class="asset-details-section-header">
-                <h3 class="asset-details-section-title">
-                    <i class="bi bi-images"></i> <span th:text="#{assets.details.image}">Asset Images</span>
-                </h3>
-            </div>
-            <div class="asset-details-info-body text-center d-flex flex-column align-items-center justify-content-center">
-                
-                <!-- Display existing images in a grid -->
-                <div th:if="${!#lists.isEmpty(asset.imageUrls)}" class="mb-3 w-100 d-flex flex-wrap gap-2 justify-content-center">
-                    <div th:each="img, iterStat : ${asset.imageUrls}" class="position-relative d-inline-block">
-                        <img th:src="@{'/uploads/' + ${img}}" alt="Asset Image" class="img-fluid rounded border shadow-sm asset-image-thumbnail" 
-                             style="max-height: 200px; object-fit: cover; cursor: pointer;"
-                             data-bs-toggle="modal" data-bs-target="#imageLightboxModal"
-                             th:onclick="'openLightbox(' + ${iterStat.index} + ')'">
-                             
-                        <!-- Delete Button Overlay -->
-                        <form th:action="@{'/assets/' + ${asset.id} + '/image/delete'}" method="post" sec:authorize="hasAnyRole('MANAGER', 'ADMIN')" class="position-absolute top-0 end-0 m-2 z-3 pt-1 pe-1">
-                            <input type="hidden" name="imageUrl" th:value="${img}" />
-                            <button type="submit" class="btn btn-sm btn-danger rounded-circle shadow-sm" style="width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center; opacity: 0.9;" onclick="return confirm('Are you sure you want to delete this photo?');" title="Delete Photo">
-                                <i class="bi bi-trash" style="font-size: 0.8rem;"></i>
+        <!-- LEFT COLUMN -->
+        <div class="d-flex flex-column" style="gap: 1.5rem;">
+            <!-- ─── Asset Image ─── -->
+            <div class="asset-details-section-card">
+                <div class="asset-details-section-header">
+                    <h3 class="asset-details-section-title">
+                        <i class="bi bi-images"></i> <span th:text="#{assets.details.image}">Asset Images</span>
+                    </h3>
+                </div>
+                <div class="asset-details-info-body text-center d-flex flex-column align-items-center justify-content-center">
+                    
+                    <!-- Display existing images in a grid -->
+                    <div th:if="${!#lists.isEmpty(asset.imageUrls)}" 
+                         class="mb-4 w-100 asset-image-gallery"
+                         th:classappend="${asset.imageUrls.size() == 3 ? 'has-3-images' : ''}">
+                         
+                        <div th:each="img, iterStat : ${asset.imageUrls}" 
+                             class="asset-thumbnail-container rounded shadow-sm border"
+                             th:classappend="${iterStat.index >= 3 ? 'd-none hidden-thumbnail' : ''}">
+                            
+                            <img th:src="@{'/uploads/' + ${img}}" alt="Asset Image" class="asset-image-thumbnail" 
+                                 style="cursor: pointer;"
+                                 data-bs-toggle="modal" data-bs-target="#imageLightboxModal"
+                                 th:onclick="'openLightbox(' + ${iterStat.index} + ')'">
+                                 
+                            <!-- Delete Button Overlay -->
+                            <form th:action="@{'/assets/' + ${asset.id} + '/image/delete'}" method="post" sec:authorize="hasAnyRole('MANAGER', 'ADMIN')" class="position-absolute top-0 end-0 m-2 z-3 pt-1 pe-1">
+                                <input type="hidden" name="imageUrl" th:value="${img}" />
+                                <button type="submit" class="btn btn-sm btn-danger rounded-circle shadow-sm" style="width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center; opacity: 0.9;" onclick="return confirm('Are you sure you want to delete this photo?');" title="Delete Photo">
+                                    <i class="bi bi-trash" style="font-size: 0.8rem;"></i>
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- View All Photos button container -->
+                        <div th:if="${asset.imageUrls.size() > 3}" class="asset-view-all-container" id="togglePhotosBtnContainer" onclick="toggleAllPhotos(document.getElementById('viewAllBtn'))">
+                            <button type="button" id="viewAllBtn" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm" style="pointer-events: none;">
+                                View all (<span th:text="${asset.imageUrls.size()}"></span>)
                             </button>
-                        </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Placeholder if no images exist -->
+                    <div th:if="${#lists.isEmpty(asset.imageUrls)}" class="mb-3 p-4 bg-light rounded border text-muted w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 200px;">
+                        <i class="bi bi-camera fs-1 mb-2"></i>
+                        <p class="mb-0 fw-medium" th:text="#{assets.details.noImage}">No image available</p>
+                    </div>
+                    
+                    <!-- Upload Form -->
+                    <form th:action="@{'/assets/' + ${asset.id} + '/image'}" method="post" enctype="multipart/form-data" sec:authorize="hasAnyRole('MANAGER', 'ADMIN')" class="mt-4 w-100">
+                        <div class="input-group">
+                            <input type="file" class="d-none" id="assetImageUpload" name="files" accept="image/*" multiple required onchange="updateFileName(this)">
+                            <label class="input-group-text m-0 px-3 cursor-pointer" for="assetImageUpload" style="background-color: var(--bg-surface-hover); color: var(--text-primary); border-color: var(--border-subtle); display: flex; align-items: center;" th:text="#{assets.details.chooseFiles}">Choose Files</label>
+                            <span class="form-control d-flex align-items-center text-muted" id="file-chosen-text" th:text="#{assets.details.noFileChosen}" th:data-empty="#{assets.details.noFileChosen}" th:data-multiple="#{assets.details.filesSelected}" style="border-right: none; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">No file chosen</span>
+                            <button class="btn btn-primary px-4 shadow-sm" type="submit">
+                                <i class="bi bi-upload me-1"></i> <span th:text="#{assets.details.uploadImage}">Upload</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- ─── Dates & Warranties ─── -->
+            <div class="asset-details-section-card">
+                <div class="asset-details-section-header">
+                    <h3 class="asset-details-section-title">
+                        <i class="bi bi-calendar-check"></i> <span th:text="#{assets.details.dates}">Important Dates</span>
+                    </h3>
+                </div>
+                <div class="asset-details-info-body">
+                    <div class="asset-details-info-row">
+                        <span class="asset-details-info-label" th:text="#{assets.table.addedDate}">Added Date</span>
+                        <span class="asset-details-info-value"
+                              th:text="${asset.createdAt != null} ? ${#temporals.format(asset.createdAt, 'dd MMM yyyy')} : #{common.noData}"></span>
+                    </div>
+                    <div class="asset-details-info-row">
+                        <span class="asset-details-info-label" th:text="#{assets.purchaseDate}">Purchase Date</span>
+                        <span class="asset-details-info-value"
+                              th:text="${asset.purchaseDate != null} ? ${#temporals.format(asset.purchaseDate, 'dd MMM yyyy')} : #{common.noData}"></span>
+                    </div>
+                    <div class="asset-details-info-row">
+                        <span class="asset-details-info-label" th:text="#{assets.warrantyEndDate}">Warranty End Date</span>
+                        <span class="asset-details-info-value"
+                              th:text="${asset.warrantyEndDate != null} ? ${#temporals.format(asset.warrantyEndDate, 'dd MMM yyyy')} : #{common.noData}"></span>
                     </div>
                 </div>
-                
-                <!-- Placeholder if no images exist -->
-                <div th:if="${#lists.isEmpty(asset.imageUrls)}" class="mb-3 p-4 bg-light rounded border text-muted w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 200px;">
-                    <i class="bi bi-camera fs-1 mb-2"></i>
-                    <p class="mb-0 fw-medium" th:text="#{assets.details.noImage}">No image available</p>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="d-flex flex-column" style="gap: 1.5rem;">
+            <!-- ─── Asset Info ─── -->
+            <div class="asset-details-section-card">
+                <div class="asset-details-section-header">
+                    <h3 class="asset-details-section-title">
+                        <i class="bi bi-info-circle"></i> <span th:text="#{assets.details.info}">Asset Information</span>
+                    </h3>
                 </div>
-                
-                <!-- Upload Form -->
-                <form th:action="@{'/assets/' + ${asset.id} + '/image'}" method="post" enctype="multipart/form-data" sec:authorize="hasAnyRole('MANAGER', 'ADMIN')" class="mt-2 w-100">
-                    <div class="input-group input-group-sm">
-                        <input type="file" class="form-control" name="files" accept="image/*" multiple required>
-                        <button class="btn btn-primary" type="submit">
-                            <i class="bi bi-upload mr-1"></i> <span th:text="#{assets.details.uploadImage}">Upload</span>
-                        </button>
+                <div class="asset-details-info-body">
+                    <div class="asset-details-info-row">
+                        <span class="asset-details-info-label" th:text="#{assets.table.inventoryNo}">Inventory No.</span>
+                        <span class="asset-details-info-value fw-bold text-accent" th:text="${asset.inventoryNumber}"></span>
                     </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- ─── Asset Info ─── -->
-        <div class="asset-details-section-card">
-            <div class="asset-details-section-header">
-                <h3 class="asset-details-section-title">
-                    <i class="bi bi-info-circle"></i> <span th:text="#{assets.details.info}">Asset Information</span>
-                </h3>
-            </div>
-            <div class="asset-details-info-body">
-                <div class="asset-details-info-row">
-                    <span class="asset-details-info-label" th:text="#{assets.table.inventoryNo}">Inventory No.</span>
-                    <span class="asset-details-info-value fw-bold text-accent" th:text="${asset.inventoryNumber}"></span>
-                </div>
-                <div class="asset-details-info-row">
-                    <span class="asset-details-info-label" th:text="#{assets.table.serialNo}">Serial No.</span>
-                    <span class="asset-details-info-value" th:text="${asset.serialNumber != null and !asset.serialNumber.isEmpty() ? asset.serialNumber : '-'}"></span>
-                </div>
-                <div class="asset-details-info-row">
-                    <span class="asset-details-info-label" th:text="#{assets.table.model}">Model</span>
-                    <span class="asset-details-info-value fw-semibold" th:text="${asset.modelName}"></span>
-                </div>
-                <div class="asset-details-info-row">
-                    <span class="asset-details-info-label" th:text="#{assets.table.category}">Category</span>
-                    <span class="asset-details-info-value" th:text="${asset.category}"></span>
+                    <div class="asset-details-info-row">
+                        <span class="asset-details-info-label" th:text="#{assets.table.serialNo}">Serial No.</span>
+                        <span class="asset-details-info-value" th:text="${asset.serialNumber != null and !asset.serialNumber.isEmpty() ? asset.serialNumber : '-'}"></span>
+                    </div>
+                    <div class="asset-details-info-row">
+                        <span class="asset-details-info-label" th:text="#{assets.table.model}">Model</span>
+                        <span class="asset-details-info-value fw-semibold" th:text="${asset.modelName}"></span>
+                    </div>
+                    <div class="asset-details-info-row">
+                        <span class="asset-details-info-label" th:text="#{assets.table.category}">Category</span>
+                        <span class="asset-details-info-value" th:text="${asset.category}"></span>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- ─── Dates & Warranties ─── -->
-        <div class="asset-details-section-card">
-            <div class="asset-details-section-header">
-                <h3 class="asset-details-section-title">
-                    <i class="bi bi-calendar-check"></i> <span th:text="#{assets.details.dates}">Important Dates</span>
-                </h3>
-            </div>
-            <div class="asset-details-info-body">
-                <div class="asset-details-info-row">
-                    <span class="asset-details-info-label" th:text="#{assets.table.addedDate}">Added Date</span>
-                    <span class="asset-details-info-value"
-                          th:text="${asset.createdAt != null} ? ${#temporals.format(asset.createdAt, 'dd MMM yyyy')} : #{common.noData}"></span>
+            
+            <!-- ─── Status & Condition ─── -->
+            <div class="asset-details-section-card">
+                <div class="asset-details-section-header">
+                    <h3 class="asset-details-section-title">
+                        <i class="bi bi-shield-check"></i> <span th:text="#{assets.details.status}">Status & Condition</span>
+                    </h3>
                 </div>
-                <div class="asset-details-info-row">
-                    <span class="asset-details-info-label" th:text="#{assets.purchaseDate}">Purchase Date</span>
-                    <span class="asset-details-info-value"
-                          th:text="${asset.purchaseDate != null} ? ${#temporals.format(asset.purchaseDate, 'dd MMM yyyy')} : #{common.noData}"></span>
-                </div>
-                <div class="asset-details-info-row">
-                    <span class="asset-details-info-label" th:text="#{assets.warrantyEndDate}">Warranty End Date</span>
-                    <span class="asset-details-info-value"
-                          th:text="${asset.warrantyEndDate != null} ? ${#temporals.format(asset.warrantyEndDate, 'dd MMM yyyy')} : #{common.noData}"></span>
-                </div>
-            </div>
-        </div>
-
-        <!-- ─── Status & Condition ─── -->
-        <div class="asset-details-section-card">
-            <div class="asset-details-section-header">
-                <h3 class="asset-details-section-title">
-                    <i class="bi bi-shield-check"></i> <span th:text="#{assets.details.status}">Status & Condition</span>
-                </h3>
-            </div>
-            <div class="asset-details-info-body">
-                <div class="asset-details-info-row">
-                    <span class="asset-details-info-label" th:text="#{assets.table.condition}">Condition</span>
-                    <span class="asset-details-info-value">
-                        <span class="badge"
-                              th:classappend="${asset.itemCondition.name() == 'NEW'} ? 'bg-success' :
-                                              (${asset.itemCondition.name() == 'USED'} ? 'bg-info' :
-                                              (${asset.itemCondition.name() == 'DAMAGED'} ? 'bg-warning' : 'bg-danger'))"
-                              th:text="#{${'enum.AssetCondition.' + asset.itemCondition}}"></span>
-                    </span>
-                </div>
-                <div class="asset-details-info-row">
-                    <span class="asset-details-info-label" th:text="#{assets.table.status}">Status</span>
-                    <span class="asset-details-info-value">
-                        <span class="badge"
-                              th:classappend="${asset.status.name() == 'AVAILABLE'} ? 'bg-success' :
-                                              (${asset.status.name() == 'IN_USE'} ? 'bg-warning' :
-                                              (${asset.status.name() == 'RESERVED'} ? 'bg-info' : 'bg-secondary'))"
-                              th:text="#{${'enum.AssetStatus.' + asset.status}}"></span>
-                    </span>
+                <div class="asset-details-info-body">
+                    <div class="asset-details-info-row">
+                        <span class="asset-details-info-label" th:text="#{assets.table.condition}">Condition</span>
+                        <span class="asset-details-info-value">
+                            <span class="badge"
+                                  th:classappend="${asset.itemCondition.name() == 'NEW'} ? 'bg-success' :
+                                                  (${asset.itemCondition.name() == 'USED'} ? 'bg-info' :
+                                                  (${asset.itemCondition.name() == 'DAMAGED'} ? 'bg-warning' : 'bg-danger'))"
+                                  th:text="#{${'enum.AssetCondition.' + asset.itemCondition}}"></span>
+                        </span>
+                    </div>
+                    <div class="asset-details-info-row">
+                        <span class="asset-details-info-label" th:text="#{assets.table.status}">Status</span>
+                        <span class="asset-details-info-value">
+                            <span class="badge"
+                                  th:classappend="${asset.status.name() == 'AVAILABLE'} ? 'bg-success' :
+                                                  (${asset.status.name() == 'IN_USE'} ? 'bg-warning' :
+                                                  (${asset.status.name() == 'RESERVED'} ? 'bg-info' : 'bg-secondary'))"
+                                  th:text="#{${'enum.AssetStatus.' + asset.status}}"></span>
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- ─── Additional Info ─── -->
-        <div class="asset-details-section-card">
-            <div class="asset-details-section-header">
-                <h3 class="asset-details-section-title">
-                    <i class="bi bi-file-text"></i> <span th:text="#{assets.details.additionalInfo}">Additional Information</span>
-                </h3>
-            </div>
-            <div class="asset-details-info-body">
-                <div class="asset-details-info-row">
-                    <span class="asset-details-info-label" th:text="#{assets.details.addedBy}">Added By</span>
-                    <span class="asset-details-info-value"
-                          th:text="${asset.addedBy != null} ? ${asset.addedBy.fullName} : #{common.noData}"></span>
+            
+            <!-- ─── Additional Info ─── -->
+            <div class="asset-details-section-card">
+                <div class="asset-details-section-header">
+                    <h3 class="asset-details-section-title">
+                        <i class="bi bi-file-text"></i> <span th:text="#{assets.details.additionalInfo}">Additional Information</span>
+                    </h3>
                 </div>
-                <div class="asset-details-info-row" th:if="${asset.description != null and !asset.description.isBlank()}" style="flex-wrap: wrap;">
-                    <span class="asset-details-info-label" th:text="#{assets.details.description}">Description</span>
-                    <span class="asset-details-info-value text-break" style="white-space: pre-wrap; width: 100%; margin-top: 0.5rem;" th:text="${asset.description}"></span>
+                <div class="asset-details-info-body">
+                    <div class="asset-details-info-row">
+                        <span class="asset-details-info-label" th:text="#{assets.details.addedBy}">Added By</span>
+                        <span class="asset-details-info-value"
+                              th:text="${asset.addedBy != null} ? ${asset.addedBy.fullName} : #{common.noData}"></span>
+                    </div>
+                    <div class="asset-details-info-row" th:if="${asset.description != null and !asset.description.isBlank()}" style="flex-wrap: wrap;">
+                        <span class="asset-details-info-label" th:text="#{assets.details.description}">Description</span>
+                        <span class="asset-details-info-value text-break" style="white-space: pre-wrap; width: 100%; margin-top: 0.5rem;" th:text="${asset.description}"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -272,6 +293,38 @@ function openLightbox(index) {
     if (carouselEl && typeof bootstrap !== 'undefined') {
         const carousel = bootstrap.Carousel.getOrCreateInstance(carouselEl);
         carousel.to(index);
+    }
+}
+
+function updateFileName(input) {
+    const span = document.getElementById('file-chosen-text');
+    if (input.files && input.files.length > 1) {
+        span.textContent = span.getAttribute('data-multiple').replace('{0}', input.files.length);
+    } else if (input.files && input.files.length === 1) {
+        span.textContent = input.files[0].name;
+    } else {
+        span.textContent = span.getAttribute('data-empty');
+    }
+}
+
+function toggleAllPhotos(btn) {
+    const hiddenThumbs = document.querySelectorAll('.hidden-thumbnail');
+    if (hiddenThumbs.length === 0) return;
+    
+    const isShowingAll = !hiddenThumbs[0].classList.contains('d-none');
+    
+    hiddenThumbs.forEach(thumb => {
+        if (isShowingAll) {
+            thumb.classList.add('d-none');
+        } else {
+            thumb.classList.remove('d-none');
+        }
+    });
+    
+    if (isShowingAll) {
+        btn.innerHTML = `View all (${hiddenThumbs.length + 3})`;
+    } else {
+        btn.innerHTML = 'Show less';
     }
 }
 </script>
