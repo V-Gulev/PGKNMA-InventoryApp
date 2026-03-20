@@ -29,11 +29,13 @@ public class AssetController {
     private final AssetService assetService;
     private final MovementService movementService;
     private final UserService userService;
+    private final com.fittrack.inventoryapp.service.FileStorageService fileStorageService;
 
-    public AssetController(AssetService assetService, MovementService movementService, UserService userService) {
+    public AssetController(AssetService assetService, MovementService movementService, UserService userService, com.fittrack.inventoryapp.service.FileStorageService fileStorageService) {
         this.assetService = assetService;
         this.movementService = movementService;
         this.userService = userService;
+        this.fileStorageService = fileStorageService;
     }
 
     @GetMapping
@@ -162,6 +164,31 @@ public class AssetController {
                     redirectAttributes.addFlashAttribute("errorMessage", "Asset not found");
                     return "redirect:/assets";
                 });
+    }
+
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    @PostMapping("/{id}/image")
+    public String uploadImage(@PathVariable Long id, @RequestParam("files") org.springframework.web.multipart.MultipartFile[] files,
+            RedirectAttributes redirectAttributes) {
+        return assetService.findAssetById(id).map(asset -> {
+            try {
+                boolean uploadedAny = false;
+                for (org.springframework.web.multipart.MultipartFile file : files) {
+                    if (!file.isEmpty()) {
+                        String path = fileStorageService.storeFile(file, "assets");
+                        asset.getImageUrls().add(path);
+                        uploadedAny = true;
+                    }
+                }
+                if (uploadedAny) {
+                    assetService.saveAsset(asset);
+                    redirectAttributes.addFlashAttribute("successMessage", "alert.success.image_uploaded");
+                }
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", "alert.error.image_upload_failed");
+            }
+            return "redirect:/assets/" + id;
+        }).orElse("redirect:/assets");
     }
 
     @GetMapping("/{id}")

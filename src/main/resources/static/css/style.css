@@ -695,6 +695,38 @@ thead.table-dark {
     color: var(--text-muted);
 }
 
+.form-control::file-selector-button {
+    background: var(--bg-surface-hover) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    margin: -0.3rem 1rem -0.3rem -0.5rem;
+    padding: 0.35rem 0.9rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.form-control::file-selector-button:hover {
+    background: var(--bg-card) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+    box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+[data-theme="light"] .form-control::file-selector-button {
+    background: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .form-control::file-selector-button:hover {
+    background: #f8fafc !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+    box-shadow: 0 4px 12px var(--accent-glow);
+}
+
 .form-label {
     color: var(--text-secondary);
     font-weight: 500;

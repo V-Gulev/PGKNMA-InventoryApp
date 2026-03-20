@@ -28,6 +28,40 @@
 
     <div class="asset-details-grid">
 
+        <!-- ─── Asset Image ─── -->
+        <div class="asset-details-section-card">
+            <div class="asset-details-section-header">
+                <h3 class="asset-details-section-title">
+                    <i class="bi bi-images"></i> <span th:text="#{assets.details.image}">Asset Images</span>
+                </h3>
+            </div>
+            <div class="asset-details-info-body text-center d-flex flex-column align-items-center justify-content-center">
+                
+                <!-- Display existing images in a grid -->
+                <div th:if="${!#lists.isEmpty(asset.imageUrls)}" class="mb-3 w-100 d-flex flex-wrap gap-2 justify-content-center">
+                    <div th:each="img : ${asset.imageUrls}">
+                        <img th:src="@{'/uploads/' + ${img}}" alt="Asset Image" class="img-fluid rounded border shadow-sm" style="max-height: 200px; object-fit: cover;">
+                    </div>
+                </div>
+                
+                <!-- Placeholder if no images exist -->
+                <div th:if="${#lists.isEmpty(asset.imageUrls)}" class="mb-3 p-4 bg-light rounded border text-muted w-100 d-flex flex-column align-items-center justify-content-center" style="min-height: 200px;">
+                    <i class="bi bi-camera fs-1 mb-2"></i>
+                    <p class="mb-0 fw-medium" th:text="#{assets.details.noImage}">No image available</p>
+                </div>
+                
+                <!-- Upload Form -->
+                <form th:action="@{'/assets/' + ${asset.id} + '/image'}" method="post" enctype="multipart/form-data" sec:authorize="hasAnyRole('MANAGER', 'ADMIN')" class="mt-2 w-100">
+                    <div class="input-group input-group-sm">
+                        <input type="file" class="form-control" name="files" accept="image/*" multiple required>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-upload mr-1"></i> <span th:text="#{assets.details.uploadImage}">Upload</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- ─── Asset Info ─── -->
         <div class="asset-details-section-card">
             <div class="asset-details-section-header">
@@ -158,7 +192,7 @@
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
-                                     style="width: 32px; height: 32px; font-weight: 600; font-size: 0.8rem;"
+                                     style="width: 32px; height: 32px; font-weight: 600; font-size: 0.8rem; color: #ffffff !important;"
                                      th:text="${#strings.substring(movement.user.username, 0, 1).toUpperCase()}">
                                 </div>
                                 <span class="fw-medium" th:text="${movement.user.username}"></span>

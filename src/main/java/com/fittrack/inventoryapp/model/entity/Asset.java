@@ -65,6 +65,12 @@ public class Asset {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @ElementCollection
+    @CollectionTable(name = "asset_images", joinColumns = @JoinColumn(name = "asset_id"))
+    @Column(name = "image_url")
+    @Builder.Default
+    private java.util.List<String> imageUrls = new java.util.ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "added_by_id")
     private User addedBy;
