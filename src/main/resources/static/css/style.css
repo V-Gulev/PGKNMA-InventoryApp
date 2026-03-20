@@ -2203,6 +2203,29 @@ a:hover {
     animation: fadeInUp 0.4s ease-out;
 }
 
+.asset-image-thumbnail {
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.asset-image-thumbnail:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md) !important;
+}
+
+.lightbox-btn {
+    background-color: var(--bg-surface) !important;
+    color: var(--text-primary) !important;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.lightbox-btn:hover {
+    background-color: var(--bg-surface-hover) !important;
+    color: var(--accent) !important;
+    transform: scale(1.1);
+}
+
 .asset-details-section-header {
     display: flex;
     align-items: center;

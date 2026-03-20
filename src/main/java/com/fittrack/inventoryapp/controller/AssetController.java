@@ -191,6 +191,25 @@ public class AssetController {
         }).orElse("redirect:/assets");
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    @PostMapping("/{id}/image/delete")
+    public String deleteImage(@PathVariable Long id, @RequestParam("imageUrl") String imageUrl,
+            RedirectAttributes redirectAttributes) {
+        return assetService.findAssetById(id).map(asset -> {
+            try {
+                if (asset.getImageUrls().contains(imageUrl)) {
+                    asset.getImageUrls().remove(imageUrl);
+                    fileStorageService.deleteFile(imageUrl);
+                    assetService.saveAsset(asset);
+                    redirectAttributes.addFlashAttribute("successMessage", "alert.success.asset_saved");
+                }
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", "error.profile.update_failed");
+            }
+            return "redirect:/assets/" + id;
+        }).orElse("redirect:/assets");
+    }
+
     @GetMapping("/{id}")
     public String showAssetDetails(@PathVariable Long id, Model model,
             @AuthenticationPrincipal UserDetails currentUser,

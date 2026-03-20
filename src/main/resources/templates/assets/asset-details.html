@@ -39,8 +39,19 @@
                 
                 <!-- Display existing images in a grid -->
                 <div th:if="${!#lists.isEmpty(asset.imageUrls)}" class="mb-3 w-100 d-flex flex-wrap gap-2 justify-content-center">
-                    <div th:each="img : ${asset.imageUrls}">
-                        <img th:src="@{'/uploads/' + ${img}}" alt="Asset Image" class="img-fluid rounded border shadow-sm" style="max-height: 200px; object-fit: cover;">
+                    <div th:each="img, iterStat : ${asset.imageUrls}" class="position-relative d-inline-block">
+                        <img th:src="@{'/uploads/' + ${img}}" alt="Asset Image" class="img-fluid rounded border shadow-sm asset-image-thumbnail" 
+                             style="max-height: 200px; object-fit: cover; cursor: pointer;"
+                             data-bs-toggle="modal" data-bs-target="#imageLightboxModal"
+                             th:onclick="'openLightbox(' + ${iterStat.index} + ')'">
+                             
+                        <!-- Delete Button Overlay -->
+                        <form th:action="@{'/assets/' + ${asset.id} + '/image/delete'}" method="post" sec:authorize="hasAnyRole('MANAGER', 'ADMIN')" class="position-absolute top-0 end-0 m-2 z-3 pt-1 pe-1">
+                            <input type="hidden" name="imageUrl" th:value="${img}" />
+                            <button type="submit" class="btn btn-sm btn-danger rounded-circle shadow-sm" style="width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center; opacity: 0.9;" onclick="return confirm('Are you sure you want to delete this photo?');" title="Delete Photo">
+                                <i class="bi bi-trash" style="font-size: 0.8rem;"></i>
+                            </button>
+                        </form>
                     </div>
                 </div>
                 
@@ -219,6 +230,51 @@
 
     </div>
 </div>
+
+<!-- Lightbox Modal -->
+<div th:if="${!#lists.isEmpty(asset.imageUrls)}" class="modal fade" id="imageLightboxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0 shadow-none">
+            <div class="modal-header border-0 pb-0 position-absolute w-100" style="z-index: 1055; top: 0;">
+                <button type="button" class="btn lightbox-btn rounded-circle ms-auto d-flex align-items-center justify-content-center border-0" data-bs-dismiss="modal" aria-label="Close" style="width: 40px; height: 40px; margin: 15px; padding: 0;">
+                    <i class="bi bi-x-lg fs-5"></i>
+                </button>
+            </div>
+            <div class="modal-body p-0 text-center">
+                <div id="assetImageCarousel" class="carousel slide">
+                    <div class="carousel-inner rounded overflow-hidden shadow-lg" style="background-color: var(--bg-card);">
+                        <div th:each="img, iterStat : ${asset.imageUrls}" th:class="${iterStat.index == 0 ? 'carousel-item active' : 'carousel-item'}">
+                            <img th:src="@{'/uploads/' + ${img}}" class="d-block mx-auto" style="max-height: 85vh; max-width: 100%; object-fit: contain;" alt="Asset Image">
+                        </div>
+                    </div>
+                    <!-- Controls -->
+                    <button th:if="${asset.imageUrls.size() > 1}" class="carousel-control-prev" type="button" data-bs-target="#assetImageCarousel" data-bs-slide="prev">
+                        <div class="lightbox-btn rounded-circle d-flex align-items-center justify-content-center" style="width: 46px; height: 46px;">
+                            <i class="bi bi-chevron-left fs-4"></i>
+                        </div>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button th:if="${asset.imageUrls.size() > 1}" class="carousel-control-next" type="button" data-bs-target="#assetImageCarousel" data-bs-slide="next">
+                        <div class="lightbox-btn rounded-circle d-flex align-items-center justify-content-center" style="width: 46px; height: 46px;">
+                            <i class="bi bi-chevron-right fs-4"></i>
+                        </div>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openLightbox(index) {
+    const carouselEl = document.getElementById('assetImageCarousel');
+    if (carouselEl && typeof bootstrap !== 'undefined') {
+        const carousel = bootstrap.Carousel.getOrCreateInstance(carouselEl);
+        carousel.to(index);
+    }
+}
+</script>
 
 <div th:replace="~{fragments/layout :: footer}"></div>
 </body>

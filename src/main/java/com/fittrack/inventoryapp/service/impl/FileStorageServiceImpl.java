@@ -59,4 +59,21 @@ public class FileStorageServiceImpl implements FileStorageService {
             throw new RuntimeException("Failed to store file.", e);
         }
     }
+    @Override
+    public void deleteFile(String path) {
+        try {
+            if (!org.springframework.util.StringUtils.hasText(path)) {
+                return;
+            }
+            if (path.contains("..")) {
+                throw new RuntimeException("Cannot delete file outside current directory.");
+            }
+            Path fileToDelete = rootLocation.resolve(path).normalize().toAbsolutePath();
+            if (fileToDelete.startsWith(rootLocation.toAbsolutePath())) {
+                Files.deleteIfExists(fileToDelete);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete file.", e);
+        }
+    }
 }
