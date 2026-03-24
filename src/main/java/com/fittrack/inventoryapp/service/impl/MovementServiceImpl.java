@@ -37,7 +37,7 @@ public class MovementServiceImpl implements MovementService {
 
     @Override
     @Transactional
-    public void borrowAsset(Long assetId, String username, LocalDate borrowedDate) {
+    public void borrowAsset(Long assetId, String username, LocalDate borrowedDate, LocalDate expectedReturnDate) {
         Asset asset = assetRepository.findById(assetId)
                 .orElseThrow(() -> new ResourceNotFoundException("error.asset.not_found"));
 
@@ -73,6 +73,7 @@ public class MovementServiceImpl implements MovementService {
                 .asset(asset)
                 .user(user)
                 .borrowedDate(borrowedDate)
+                .expectedReturnDate(expectedReturnDate)
                 .status(initialStatus)
                 .build();
 

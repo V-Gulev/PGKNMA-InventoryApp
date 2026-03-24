@@ -34,49 +34,49 @@
 
     <!-- ─── Stats Grid ─── -->
     <div class="admin-stats">
-        <div class="dash-stat-card">
-            <div class="dash-stat-icon" style="background: rgba(99,102,241,0.12); color: var(--accent);">
+        <div class="admin-stat-card">
+            <div class="admin-stat-icon admin-stat-icon--accent">
                 <i class="bi bi-collection"></i>
             </div>
-            <div class="dash-stat-info">
-                <span class="dash-stat-value" th:text="${totalAssets}">0</span>
-                <span class="dash-stat-label" th:text="#{admin.totalAssets}">Total Assets</span>
+            <div class="admin-stat-info">
+                <span class="admin-stat-value" th:text="${totalAssets}">0</span>
+                <span class="admin-stat-label" th:text="#{admin.totalAssets}">Total Assets</span>
             </div>
         </div>
-        <div class="dash-stat-card">
-            <div class="dash-stat-icon" style="background: rgba(34,197,94,0.12); color: var(--success);">
+        <div class="admin-stat-card">
+            <div class="admin-stat-icon admin-stat-icon--success">
                 <i class="bi bi-check-circle"></i>
             </div>
-            <div class="dash-stat-info">
-                <span class="dash-stat-value" th:text="${availableAssets}">0</span>
-                <span class="dash-stat-label" th:text="#{admin.available}">Available</span>
+            <div class="admin-stat-info">
+                <span class="admin-stat-value" th:text="${availableAssets}">0</span>
+                <span class="admin-stat-label" th:text="#{admin.available}">Available</span>
             </div>
         </div>
-        <div class="dash-stat-card">
-            <div class="dash-stat-icon" style="background: rgba(245,158,11,0.12); color: var(--warning);">
+        <div class="admin-stat-card">
+            <div class="admin-stat-icon admin-stat-icon--warning">
                 <i class="bi bi-person-raised-hand"></i>
             </div>
-            <div class="dash-stat-info">
-                <span class="dash-stat-value" th:text="${inUseAssets}">0</span>
-                <span class="dash-stat-label" th:text="#{admin.inUse}">In Use</span>
+            <div class="admin-stat-info">
+                <span class="admin-stat-value" th:text="${inUseAssets}">0</span>
+                <span class="admin-stat-label" th:text="#{admin.inUse}">In Use</span>
             </div>
         </div>
-        <div class="dash-stat-card">
-            <div class="dash-stat-icon" style="background: rgba(107,114,128,0.12); color: var(--text-muted);">
+        <div class="admin-stat-card">
+            <div class="admin-stat-icon admin-stat-icon--muted">
                 <i class="bi bi-calendar-check"></i>
             </div>
-            <div class="dash-stat-info">
-                <span class="dash-stat-value" th:text="${reservedAssets}">0</span>
-                <span class="dash-stat-label" th:text="#{admin.reserved}">Reserved</span>
+            <div class="admin-stat-info">
+                <span class="admin-stat-value" th:text="${reservedAssets}">0</span>
+                <span class="admin-stat-label" th:text="#{admin.reserved}">Reserved</span>
             </div>
         </div>
-        <div class="dash-stat-card">
-            <div class="dash-stat-icon" style="background: rgba(59,130,246,0.12); color: var(--info);">
+        <div class="admin-stat-card">
+            <div class="admin-stat-icon admin-stat-icon--info">
                 <i class="bi bi-people"></i>
             </div>
-            <div class="dash-stat-info">
-                <span class="dash-stat-value" th:text="${totalUsers}">0</span>
-                <span class="dash-stat-label" th:text="#{admin.registeredUsers}">Registered Users</span>
+            <div class="admin-stat-info">
+                <span class="admin-stat-value" th:text="${totalUsers}">0</span>
+                <span class="admin-stat-label" th:text="#{admin.registeredUsers}">Registered Users</span>
             </div>
         </div>
     </div>
@@ -87,6 +87,7 @@
             <h3 class="admin-section-title">
                 <i class="bi bi-people"></i> <span th:text="#{admin.allUsers}">All Users</span>
             </h3>
+            <span class="admin-section-badge badge" th:text="${totalUsers}">0</span>
         </div>
         <div class="admin-section-body">
             <div class="table-responsive">
@@ -104,22 +105,27 @@
                     <tr th:each="u, iter : ${users}">
                         <td class="text-muted fw-medium" th:text="${iter.index + 1}"></td>
                         <td>
-                            <span class="fw-semibold" th:text="${u.username}"></span>
+                            <div class="admin-user-cell">
+                                <div class="admin-user-avatar">
+                                    <span th:text="${#strings.toUpperCase(#strings.substring(u.username, 0, 1))}">U</span>
+                                </div>
+                                <span class="fw-semibold" th:text="${u.username}"></span>
+                            </div>
                         </td>
                         <td th:text="${u.fullName}"></td>
                         <td>
                             <!-- If the user is the currently logged-in admin, show static badge to prevent self-lockout -->
-                            <span th:if="${u.username == #authentication.name}" class="badge bg-danger" th:text="#{${'enum.Role.' + u.role}}"></span>
+                            <span th:if="${u.username == #authentication.name}" class="admin-role-badge admin-role-badge--self" th:text="#{${'enum.Role.' + u.role}}"></span>
 
                             <!-- If the user is someone else, show the form -->
                             <form th:unless="${u.username == #authentication.name}" th:action="@{/admin/users/{id}/role(id=${u.id})}" method="post" class="admin-role-form">
-                                <select name="role" class="form-select form-select-sm" required>
+                                <select name="role" class="admin-role-select" required>
                                     <option value="STUDENT" th:selected="${u.role.name() == 'STUDENT'}" th:text="#{enum.Role.STUDENT}"></option>
                                     <option value="TEACHER" th:selected="${u.role.name() == 'TEACHER'}" th:text="#{enum.Role.TEACHER}"></option>
                                     <option value="MANAGER" th:selected="${u.role.name() == 'MANAGER'}" th:text="#{enum.Role.MANAGER}"></option>
                                     <option value="ADMIN" th:selected="${u.role.name() == 'ADMIN'}" th:text="#{enum.Role.ADMIN}"></option>
                                 </select>
-                                <button type="submit" class="btn btn-sm btn-outline-primary" th:text="#{admin.users.update}">Update</button>
+                                <button type="submit" class="admin-role-btn" th:text="#{admin.users.update}">Update</button>
                             </form>
                         </td>
                         <td class="text-secondary" th:text="${u.createdAt != null} ? ${#temporals.format(u.createdAt, 'dd MMM yyyy HH:mm')} : #{common.noData}"></td>
@@ -131,12 +137,12 @@
     </div>
 
     <!-- ─── Pending Manager Requests ─── -->
-    <div class="admin-section-card" style="margin-top: 1.5rem;" th:if="${pendingManagerRequests != null and !pendingManagerRequests.isEmpty()}">
-        <div class="admin-section-header">
+    <div class="admin-section-card admin-section-card--spaced" th:if="${pendingManagerRequests != null and !pendingManagerRequests.isEmpty()}">
+        <div class="admin-section-header admin-section-header--warning">
             <h3 class="admin-section-title">
                 <i class="bi bi-person-plus"></i> <span th:text="#{admin.managerRequests.title}">Pending Manager Requests</span>
             </h3>
-            <span class="badge bg-danger admin-section-badge" th:text="${pendingManagerRequests.size()}">0</span>
+            <span class="admin-section-badge badge bg-danger" th:text="${pendingManagerRequests.size()}">0</span>
         </div>
         <div class="admin-section-body">
             <div class="table-responsive">
@@ -159,12 +165,14 @@
                         <td th:text="${req.fullName}"></td>
                         <td class="text-secondary" th:text="${req.createdAt != null} ? ${#temporals.format(req.createdAt, 'dd MMM yyyy HH:mm')} : #{common.noData}"></td>
                         <td>
-                            <form th:action="@{/admin/requests/{id}/approve(id=${req.id})}" method="post" style="display:inline-block;">
-                                <button type="submit" class="btn btn-sm btn-success" th:text="#{admin.managerRequests.approve}">Approve</button>
-                            </form>
-                            <form th:action="@{/admin/requests/{id}/reject(id=${req.id})}" method="post" style="display:inline-block; margin-left: 0.25rem;">
-                                <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{admin.managerRequests.reject}">Reject</button>
-                            </form>
+                            <div class="admin-request-actions">
+                                <form th:action="@{/admin/requests/{id}/approve(id=${req.id})}" method="post">
+                                    <button type="submit" class="admin-action-btn admin-action-btn--approve" th:text="#{admin.managerRequests.approve}">Approve</button>
+                                </form>
+                                <form th:action="@{/admin/requests/{id}/reject(id=${req.id})}" method="post">
+                                    <button type="submit" class="admin-action-btn admin-action-btn--reject" th:text="#{admin.managerRequests.reject}">Reject</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     </tbody>
@@ -174,12 +182,12 @@
     </div>
 
     <!-- ─── Active Borrows ─── -->
-    <div class="admin-section-card" style="margin-top: 1.5rem;">
+    <div class="admin-section-card admin-section-card--spaced">
         <div class="admin-section-header">
             <h3 class="admin-section-title">
                 <i class="bi bi-arrow-left-right"></i> <span th:text="#{admin.activeBorrows}">Active Borrows</span>
             </h3>
-            <span class="badge bg-warning admin-section-badge" th:text="${activeMovements}">0</span>
+            <span class="admin-section-badge badge bg-warning" th:text="${activeMovements}">0</span>
         </div>
         <div class="admin-section-body">
             <div class="table-responsive">
@@ -190,7 +198,8 @@
                         <th th:text="#{admin.borrows.table.asset}">Asset</th>
                         <th th:text="#{admin.borrows.table.borrower}">User</th>
                         <th th:text="#{admin.borrows.table.borrowedDate}">Borrowed Date</th>
-                        <th th:text="#{admin.borrows.table.status}">Status</th>
+                        <th th:text="#{admin.borrows.table.expectedReturn}">Expected Return</th>
+                        <th th:text="#{admin.borrows.table.notes}">Notes</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -201,8 +210,29 @@
                             <small class="text-muted d-block" th:text="'#' + ${m.asset.inventoryNumber}"></small>
                         </td>
                         <td th:text="${m.user.fullName}"></td>
-                        <td class="text-secondary" th:text="${#temporals.format(m.borrowedDate, 'dd MMM yyyy HH:mm')}"></td>
-                        <td><span class="badge bg-warning" th:text="#{myItems.active}">Active</span></td>
+                        <td class="text-secondary" th:text="${#temporals.format(m.borrowedDate, 'dd MMM yyyy')}"></td>
+                        <td>
+                            <div th:if="${m.expectedReturnDate != null}" class="admin-return-cell">
+                                <span class="admin-return-date" th:text="${#temporals.format(m.expectedReturnDate, 'dd MMM yyyy')}"></span>
+                                <!-- Overdue -->
+                                <span th:if="${m.expectedReturnDate.isBefore(T(java.time.LocalDate).now())}"
+                                      class="admin-due-badge admin-due-badge--overdue"
+                                      th:text="#{admin.borrows.overdue}">Overdue</span>
+                                <!-- Due today -->
+                                <span th:if="${m.expectedReturnDate.isEqual(T(java.time.LocalDate).now())}"
+                                      class="admin-due-badge admin-due-badge--today"
+                                      th:text="#{admin.borrows.dueToday}">Due Today</span>
+                                <!-- Due soon (within 3 days) -->
+                                <span th:if="${m.expectedReturnDate.isAfter(T(java.time.LocalDate).now()) and m.expectedReturnDate.isBefore(T(java.time.LocalDate).now().plusDays(4))}"
+                                      class="admin-due-badge admin-due-badge--soon"
+                                      th:text="#{admin.borrows.dueSoon}">Due Soon</span>
+                            </div>
+                            <span th:if="${m.expectedReturnDate == null}" class="text-muted">—</span>
+                        </td>
+                        <td>
+                            <span th:if="${m.notes != null and !m.notes.isEmpty()}" class="admin-notes-text" th:text="${m.notes}"></span>
+                            <span th:if="${m.notes == null or m.notes.isEmpty()}" class="text-muted">—</span>
+                        </td>
                     </tr>
                     </tbody>
                 </table>

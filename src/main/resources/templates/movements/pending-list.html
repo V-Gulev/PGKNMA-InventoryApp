@@ -67,22 +67,34 @@
                         <span th:text="${m.user.fullName}"></span>
                         <small class="text-muted d-block" th:text="'(' + #{${'enum.Role.' + m.user.role}} + ')'"></small>
                     </td>
-                    <td th:text="${#temporals.format(m.borrowedDate, 'dd MMM yyyy')}"></td>
+                    <td>
+                        <div class="d-flex flex-column gap-1">
+                            <span class="d-flex align-items-center fw-medium">
+                                <i class="bi bi-calendar-event text-secondary me-2"></i>
+                                <span th:text="${#temporals.format(m.borrowedDate, 'dd MMM yyyy')}"></span>
+                            </span>
+                            <span class="text-secondary small d-flex align-items-center">
+                                <i class="bi bi-arrow-right-short text-muted me-1"></i>
+                                <span th:text="#{movements.table.expectedReturn}">Expected Return</span>:
+                                <span th:text="${m.expectedReturnDate != null ? #temporals.format(m.expectedReturnDate, 'dd MMM yyyy') : '-'}" class="ms-1"></span>
+                            </span>
+                        </div>
+                    </td>
                     <td>
                         <div class="pending-actions">
-                            <form th:action="@{/movements/{id}/approve(id=${m.id})}" method="post">
-                                <button type="submit" class="btn btn-sm btn-success" th:title="#{pending.approve}">
-                                    <i class="bi bi-check-lg"></i> <span th:text="#{pending.approve}">Approve</span>
+                            <form th:id="'approveForm-' + ${m.id}" th:action="@{/movements/{id}/approve(id=${m.id})}" method="post" class="d-none"></form>
+                            <form th:id="'rejectForm-' + ${m.id}" th:action="@{/movements/{id}/reject(id=${m.id})}" method="post" class="d-none"></form>
+
+                            <button th:form="'approveForm-' + ${m.id}" type="submit" class="pending-btn pending-btn--approve" th:title="#{pending.approve}">
+                                <i class="bi bi-check-lg"></i> <span th:text="#{pending.approve}">Approve</span>
+                            </button>
+
+                            <div class="pending-reject-group">
+                                <input th:form="'rejectForm-' + ${m.id}" type="text" name="notes" class="pending-reject-input" th:placeholder="#{pending.rejectReason.placeholder}">
+                                <button th:form="'rejectForm-' + ${m.id}" type="submit" class="pending-btn pending-btn--reject" th:title="#{pending.reject}">
+                                    <i class="bi bi-x-lg"></i> <span th:text="#{pending.reject}">Reject</span>
                                 </button>
-                            </form>
-                            <form th:action="@{/movements/{id}/reject(id=${m.id})}" method="post">
-                                <div class="input-group input-group-sm pending-reject-group">
-                                    <input type="text" name="notes" class="form-control" th:placeholder="#{pending.rejectReason.placeholder}" required>
-                                    <button class="btn btn-danger" type="submit" th:title="#{pending.reject}">
-                                        <i class="bi bi-x-lg"></i> <span th:text="#{pending.reject}">Reject</span>
-                                    </button>
-                                </div>
-                            </form>
+                            </div>
                         </div>
                     </td>
                 </tr>

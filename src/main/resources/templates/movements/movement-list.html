@@ -119,8 +119,11 @@
                 <span th:if="${m.status != null && m.status.name() == 'REJECTED'}" class="badge bg-danger movements-card-badge">
                     <i class="bi bi-x-circle"></i> <span th:text="#{${'enum.MovementStatus.REJECTED'}}">Rejected</span>
                 </span>
-                <span th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.returnedDate != null}" class="badge bg-secondary movements-card-badge">
+                <span th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.returnedDate != null && (m.notes == null || !#strings.containsIgnoreCase(m.notes, 'cancel'))}" class="badge bg-secondary movements-card-badge">
                     <i class="bi bi-check2-all"></i> <span th:text="#{movements.filter.returned}">Returned</span>
+                </span>
+                <span th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.returnedDate != null && m.notes != null && #strings.containsIgnoreCase(m.notes, 'cancel')}" class="badge bg-danger movements-card-badge">
+                    <i class="bi bi-x-circle"></i> <span th:text="#{movements.cancelled}">Cancelled</span>
                 </span>
                 <span th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.returnedDate == null && m.borrowedDate.isAfter(T(java.time.LocalDate).now())}" class="badge bg-info movements-card-badge">
                     <i class="bi bi-calendar-check"></i> <span th:text="#{myItems.scheduled}">Scheduled</span>
@@ -140,8 +143,13 @@
                     <span class="movements-card-detail-label"><i class="bi bi-calendar3"></i> <span th:text="#{movements.table.borrowedDate}">Borrowed</span></span>
                     <span class="movements-card-detail-value" th:text="${#temporals.format(m.borrowedDate, 'dd MMM yyyy')}">01 Jan 2025</span>
                 </div>
+                <div class="movements-card-detail">
+                    <span class="movements-card-detail-label"><i class="bi bi-calendar-range"></i> <span th:text="#{movements.table.expectedReturn}">Expected Return</span></span>
+                    <span class="movements-card-detail-value" th:text="${m.expectedReturnDate != null ? #temporals.format(m.expectedReturnDate, 'dd MMM yyyy') : '-'}">10 Jan 2025</span>
+                </div>
                 <div class="movements-card-detail" th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.returnedDate != null}">
-                    <span class="movements-card-detail-label"><i class="bi bi-calendar-check"></i> <span th:text="#{movements.table.returnedDate}">Returned</span></span>
+                    <span th:if="${m.notes == null || !#strings.containsIgnoreCase(m.notes, 'cancel')}" class="movements-card-detail-label"><i class="bi bi-calendar-check"></i> <span th:text="#{movements.table.returnedDate}">Returned</span></span>
+                    <span th:if="${m.notes != null && #strings.containsIgnoreCase(m.notes, 'cancel')}" class="movements-card-detail-label"><i class="bi bi-calendar-x"></i> <span th:text="#{movements.cancelledDate}">Cancelled On</span></span>
                     <span class="movements-card-detail-value" th:text="${#temporals.format(m.returnedDate, 'dd MMM yyyy')}">15 Jan 2025</span>
                 </div>
             </div>
@@ -166,8 +174,13 @@
                 </div>
 
                 <!-- Returned – no action needed -->
-                <div th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.returnedDate != null}" class="movements-card-action-info movements-card-action-info--muted">
+                <div th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.returnedDate != null && (m.notes == null || !#strings.containsIgnoreCase(m.notes, 'cancel'))}" class="movements-card-action-info movements-card-action-info--muted">
                     <i class="bi bi-check-circle"></i> Completed
+                </div>
+
+                <!-- Cancelled action label -->
+                <div th:if="${(m.status == null || m.status.name() == 'APPROVED') && m.returnedDate != null && m.notes != null && #strings.containsIgnoreCase(m.notes, 'cancel')}" class="movements-card-action-info movements-card-action-info--danger">
+                    <i class="bi bi-x-circle"></i> <span th:text="#{movements.cancelled}">Cancelled</span>
                 </div>
 
                 <!-- Active → return form -->

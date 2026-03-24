@@ -110,6 +110,10 @@
                     <span class="my-items-card-detail-label"><i class="bi bi-calendar3"></i> <span th:text="#{myItems.borrowedDate}">Borrowed</span></span>
                     <span class="my-items-card-detail-value" th:text="${#temporals.format(m.borrowedDate, 'dd MMM yyyy')}">01 Jan 2025</span>
                 </div>
+                <div class="my-items-card-detail">
+                    <span class="my-items-card-detail-label"><i class="bi bi-calendar-range"></i> <span th:text="#{myItems.expectedReturnDate}">Expected Return</span></span>
+                    <span class="my-items-card-detail-value" th:text="${m.expectedReturnDate != null ? #temporals.format(m.expectedReturnDate, 'dd MMM yyyy') : '-'}">10 Jan 2025</span>
+                </div>
             </div>
 
             <!-- Card Actions -->

@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface MovementService {
-    void borrowAsset(Long assetId, String username, LocalDate borrowedDate);
+    void borrowAsset(Long assetId, String username, LocalDate borrowedDate, LocalDate expectedReturnDate);
 
     void approveBorrow(Long movementId);
 

@@ -215,6 +215,7 @@
                     <tr>
                         <th th:text="#{movements.table.borrower}">Borrower</th>
                         <th th:text="#{movements.table.borrowedDate}">Borrowed Date</th>
+                        <th th:text="#{movements.table.expectedReturn}">Expected Return</th>
                         <th th:text="#{movements.table.returnedDate}">Returned Date</th>
                         <th th:text="#{movements.table.status}">Status</th>
                     </tr>
@@ -231,6 +232,7 @@
                             </div>
                         </td>
                         <td class="text-secondary" th:text="${movement.borrowedDate != null ? #temporals.format(movement.borrowedDate, 'dd MMM yyyy') : '—'}"></td>
+                        <td class="text-secondary" th:text="${movement.expectedReturnDate != null ? #temporals.format(movement.expectedReturnDate, 'dd MMM yyyy') : '—'}"></td>
                         <td class="text-secondary" th:text="${movement.returnedDate != null ? #temporals.format(movement.returnedDate, 'dd MMM yyyy') : '—'}"></td>
                         <td>
                             <span class="badge"

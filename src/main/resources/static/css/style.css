@@ -2536,7 +2536,7 @@ a:hover {
     min-height: 60vh;
 }
 
-/* Admin Stats - 5 columns */
+/* ─── Admin Stats ─── */
 .admin-stats {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -2544,7 +2544,69 @@ a:hover {
     margin-bottom: 2rem;
 }
 
-/* Section Cards */
+.admin-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.15rem 1.25rem;
+    backdrop-filter: blur(12px);
+    transition: var(--transition-smooth);
+    animation: fadeInUp 0.5s ease-out backwards;
+}
+
+.admin-stat-card:nth-child(1) { animation-delay: 0.04s; }
+.admin-stat-card:nth-child(2) { animation-delay: 0.08s; }
+.admin-stat-card:nth-child(3) { animation-delay: 0.12s; }
+.admin-stat-card:nth-child(4) { animation-delay: 0.16s; }
+.admin-stat-card:nth-child(5) { animation-delay: 0.20s; }
+
+.admin-stat-card:hover {
+    border-color: var(--border-accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.admin-stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.admin-stat-icon--accent  { background: rgba(99,102,241,0.12); color: var(--accent); }
+.admin-stat-icon--success { background: rgba(34,197,94,0.12);  color: var(--success); }
+.admin-stat-icon--warning { background: rgba(245,158,11,0.12); color: var(--warning); }
+.admin-stat-icon--muted   { background: rgba(107,114,128,0.12); color: var(--text-muted); }
+.admin-stat-icon--info    { background: rgba(59,130,246,0.12);  color: var(--info); }
+
+.admin-stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-primary);
+}
+
+.admin-stat-label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ─── Section Cards ─── */
 .admin-section-card {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
@@ -2554,13 +2616,21 @@ a:hover {
     animation: fadeInUp 0.4s ease-out;
 }
 
+.admin-section-card--spaced {
+    margin-top: 1.5rem;
+}
+
 .admin-section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1.25rem;
+    padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--border-subtle);
     background: rgba(255, 255, 255, 0.02);
+}
+
+.admin-section-header--warning {
+    border-left: 3px solid var(--warning);
 }
 
 .admin-section-title {
@@ -2575,9 +2645,17 @@ a:hover {
     margin-right: 0.35rem;
 }
 
+.admin-section-header--warning .admin-section-title i {
+    color: var(--warning);
+}
+
 .admin-section-badge {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    background: var(--bg-surface-hover);
+    color: var(--text-secondary);
 }
 
 .admin-section-body {
@@ -2593,7 +2671,29 @@ a:hover {
     margin-bottom: 0;
 }
 
-/* Role Change Form */
+/* ─── User cell with avatar ─── */
+.admin-user-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.admin-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #818cf8);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    letter-spacing: 0.02em;
+}
+
+/* ─── Role Change Form ─── */
 .admin-role-form {
     display: flex;
     align-items: center;
@@ -2602,9 +2702,179 @@ a:hover {
     padding: 0;
 }
 
-.admin-role-form .form-select {
-    width: auto;
-    min-width: 110px;
+.admin-role-select {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    background: var(--bg-surface-hover);
+    color: var(--text-primary);
+    outline: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    min-width: 100px;
+}
+
+.admin-role-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.admin-role-btn {
+    padding: 0.3rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-role-btn:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 2px 10px var(--accent-glow);
+    transform: translateY(-1px);
+}
+
+.admin-role-badge {
+    display: inline-block;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.admin-role-badge--self {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+/* ─── Manager Request Actions ─── */
+.admin-request-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-action-btn--approve {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
+}
+
+.admin-action-btn--approve:hover {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.40);
+    transform: translateY(-1px);
+}
+
+.admin-action-btn--reject {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.admin-action-btn--reject:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--danger);
+    transform: translateY(-1px);
+}
+
+/* ─── Status Badges ─── */
+.admin-status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+}
+
+.admin-status-badge--active {
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+/* ─── Return Date Cell ─── */
+.admin-return-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.admin-return-date {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.88rem;
+}
+
+.admin-due-badge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.admin-due-badge--overdue {
+    background: rgba(239, 68, 68, 0.12);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+.admin-due-badge--today {
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.admin-due-badge--soon {
+    background: rgba(234, 179, 8, 0.10);
+    color: #ca8a04;
+    border: 1px solid rgba(234, 179, 8, 0.20);
+}
+
+@keyframes pulse-subtle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ─── Notes Text ─── */
+.admin-notes-text {
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    max-width: 200px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
 }
 
 /* ─── Dashboard Page ─── */
@@ -3029,13 +3299,96 @@ a:hover {
 
 .pending-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.75rem;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
+/* Shared base for approve/reject buttons */
+.pending-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 1.4;
+}
+
+.pending-btn i {
+    font-size: 0.9rem;
+}
+
+/* Approve button */
+.pending-btn--approve {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.30);
+}
+
+.pending-btn--approve:hover {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.45);
+    transform: translateY(-1px);
+}
+
+.pending-btn--approve:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(34, 197, 94, 0.25);
+}
+
+/* Reject button */
+.pending-btn--reject {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.30);
+}
+
+.pending-btn--reject:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.45);
+    transform: translateY(-1px);
+}
+
+.pending-btn--reject:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(239, 68, 68, 0.25);
+}
+
+/* Reject group: input + button inline */
 .pending-reject-group {
-    min-width: 220px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pending-reject-input {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.82rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    background: var(--bg-surface-hover);
+    color: var(--text-primary);
+    min-width: 130px;
+    max-width: 180px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.pending-reject-input::placeholder {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+
+.pending-reject-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
 /* Empty State */
@@ -3185,11 +3538,17 @@ a:hover {
 
     .pending-actions {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+        flex-wrap: wrap;
     }
 
     .pending-reject-group {
-        min-width: 100%;
+        width: 100%;
+    }
+
+    .pending-reject-input {
+        flex: 1;
+        max-width: none;
     }
 }
 

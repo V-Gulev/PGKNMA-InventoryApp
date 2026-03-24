@@ -38,6 +38,10 @@ public class AssetMovement {
     @Column(name = "borrowed_date", nullable = false)
     private LocalDate borrowedDate;
 
+    @NotNull(message = "Expected return date is required")
+    @Column(name = "expected_return_date")
+    private LocalDate expectedReturnDate;
+
     @Column(name = "returned_date")
     private LocalDateTime returnedDate;
 

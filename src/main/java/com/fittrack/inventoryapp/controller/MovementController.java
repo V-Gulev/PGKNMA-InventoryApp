@@ -98,6 +98,7 @@ public class MovementController {
     public String borrowAsset(@RequestParam("assetId") Long assetId,
             @RequestParam("username") String username,
             @RequestParam("borrowedDate") String borrowedDateStr,
+            @RequestParam("expectedReturnDate") String expectedReturnDateStr,
             @AuthenticationPrincipal UserDetails currentUser,
             RedirectAttributes redirectAttributes) {
 
@@ -109,8 +110,10 @@ public class MovementController {
 
         // Validate borrowed date
         LocalDate borrowedDate;
+        LocalDate expectedReturnDate;
         try {
             borrowedDate = LocalDate.parse(borrowedDateStr);
+            expectedReturnDate = LocalDate.parse(expectedReturnDateStr);
         } catch (DateTimeParseException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "error.date.invalid");
             return "redirect:/movements/borrow";
@@ -122,8 +125,13 @@ public class MovementController {
             return "redirect:/movements/borrow";
         }
 
+        if (expectedReturnDate.isBefore(borrowedDate)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "error.borrow.end_before_start");
+            return "redirect:/movements/borrow";
+        }
+
         try {
-            movementService.borrowAsset(assetId, username, borrowedDate);
+            movementService.borrowAsset(assetId, username, borrowedDate, expectedReturnDate);
             redirectAttributes.addFlashAttribute("successMessage", "alert.success.asset_borrowed");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());

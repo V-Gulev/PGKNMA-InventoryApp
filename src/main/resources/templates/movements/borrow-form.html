@@ -55,8 +55,18 @@
                             <label for="borrowedDate" class="form-label" th:text="#{borrow.borrowedDate}">Borrowed Date *</label>
                             <input type="date" id="borrowedDate" name="borrowedDate"
                                    class="form-control" required
-                                   th:min="${T(java.time.LocalDate).now()}"/>
+                                   th:min="${T(java.time.LocalDate).now()}"
+                                   onchange="document.getElementById('expectedReturnDate').min = this.value;"/>
                             <div class="form-text" th:text="#{borrow.borrowedDate.hint}">Select the borrow date. Future dates will schedule the borrow.</div>
+                        </div>
+
+                        <!-- Expected Return Date -->
+                        <div class="mb-3">
+                            <label for="expectedReturnDate" class="form-label" th:text="#{borrow.expectedReturnDate}">Expected Return Date *</label>
+                            <input type="date" id="expectedReturnDate" name="expectedReturnDate"
+                                   class="form-control" required
+                                   th:min="${T(java.time.LocalDate).now()}"/>
+                            <div class="form-text" th:text="#{borrow.expectedReturnDate.hint}">Select when you plan to return the asset.</div>
                         </div>
 
                         <div class="d-flex gap-2 mt-3">
